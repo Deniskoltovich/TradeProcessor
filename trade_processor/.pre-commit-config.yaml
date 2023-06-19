@@ -1,27 +1,36 @@
 repos:
+  - repo: https://github.com/psf/black
+    rev: 22.3.0
+    hooks:
+      - id: black
+        args: 
+          - --skip-string-normalization
+          - --line-length=79
+          
   - repo: https://github.com/PyCQA/flake8
     rev: 3.9.2
     hooks:
       - id: flake8
+        additional_dependencies: [flake8-bugbear, dlint, djangorestframework-stubs, django-stubs]
+        exclude: .*settings\.py
         args:
           - --max-line-length=79
           - --max-doc-length=72
-          - --ignore=E203,W503
+          - --ignore=E203,W503,W291,W292,F401
+
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: 9feadeb
+    rev: v0.910
     hooks:
       - id: mypy
         exclude: ^tests/
+        exclude: .*models\.py
+        additional_dependencies: [mypy==0.910, types-six, djangorestframework-stubs, django-stubs]
         args:
-          - --disallow-untyped-defs
-          - --check-untyped-defs
           - --warn-redundant-casts
           - --no-implicit-optional
+          - --ignore-missing-imports
           - --strict-optional
-  - repo: https://github.com/psf/black
-    rev: 21.6b0
-    hooks:
-      - id: black
+
   - repo: https://github.com/pycqa/isort 
     rev: 5.12.0 
     hooks: 
