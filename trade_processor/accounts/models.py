@@ -15,13 +15,17 @@ class CustomUser(AbstractUser, EditCreationDateMixinModel):
         DEACTIVE = 'Deactive'
 
     email = models.EmailField(unique=True)
-    role = models.IntegerField(choices=Role.choices, default=Role.USER)
-    avatar_url = models.CharField(max_length=255, unique=True, default=None)
-    subscriptions = models.ManyToManyField(Asset)
-    status = models.IntegerField(
-        choices=Status.choices, default=Status.DEACTIVE
+    role = models.CharField(
+        choices=Role.choices, default=Role.USER, max_length=7
     )
-    balance = models.PositiveIntegerField(default=0)
+    avatar_url = models.CharField(max_length=255, null=True, default=None)
+    subscriptions = models.ManyToManyField(Asset)
+    status = models.CharField(
+        choices=Status.choices, default=Status.DEACTIVE, max_length=9
+    )
+    balance = models.DecimalField(
+        max_digits=11, decimal_places=2, default=0.00
+    )
 
 
 class Portfolio(EditCreationDateMixinModel):
