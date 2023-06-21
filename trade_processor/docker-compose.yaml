@@ -8,6 +8,8 @@ services:
     ports:
       - '${APP_PORT}:8000'
 
+    volumes:
+      - .:/var
     env_file:
       - .env
     depends_on:
