@@ -29,7 +29,7 @@ class CustomUser(AbstractUser, EditCreationDateMixinModel):
 
 
 class Portfolio(EditCreationDateMixinModel):
-    user_id = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     assets = models.ManyToManyField(Asset)
     name = models.CharField(max_length=64, default="My portfolio")
     description = models.TextField(blank=True)

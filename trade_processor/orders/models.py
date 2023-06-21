@@ -13,13 +13,15 @@ class Order(EditCreationDateMixinModel):
         FINISHED = 'Finished'
         CANCELLED = 'Cancelled'
 
-    class INITIALIZER(models.TextChoices):
+    class Initializer(models.TextChoices):
         AUTO = 'Auto'
         MANUAL = 'Manual'
 
-    portfolio_id = models.ForeignKey(Portfolio, on_delete=models.CASCADE)
-    asset_id = models.ForeignKey(Asset, on_delete=models.CASCADE)
-    initializer = models.CharField(max_length=6, choices=INITIALIZER.choices)
+    portfolio = models.ForeignKey(Portfolio, on_delete=models.CASCADE)
+    asset = models.ForeignKey(Asset, on_delete=models.CASCADE)
+    initializer = models.CharField(
+        max_length=6, choices=Initializer.choices, default=Initializer.MANUAL
+    )
     operation_type = models.CharField(
         max_length=4, choices=OperationType.choices
     )
@@ -42,9 +44,9 @@ class AutoOrder(EditCreationDateMixinModel):
         HIGHER = 'Higher'
         LOWER = 'Lower'
 
-    portfolio_id = models.ForeignKey(Portfolio, on_delete=models.CASCADE)
+    portfolio = models.ForeignKey(Portfolio, on_delete=models.CASCADE)
 
-    asset_id = models.ForeignKey(Asset, on_delete=models.CASCADE)
+    asset = models.ForeignKey(Asset, on_delete=models.CASCADE)
     operation_type = models.CharField(
         max_length=4, choices=OperationType.choices
     )
