@@ -1,6 +1,6 @@
 #!/bin/sh
 
 python manage.py migrate
-gunicorn config.wsgi:application --bind ${APP_HOST}:${APP_PORT:}
+python manage.py runserver ${APP_HOST}:${APP_PORT}
 
 exec "$@"

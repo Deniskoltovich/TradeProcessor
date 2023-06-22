@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "b61164841790d074f6b79cd162f6399da25bafb8c08f13f160c83dfaa2b94b20"
+            "sha256": "c1c7b129ec0e08e9d99089db3216802534f349c870885db01ec0999e670065f9"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -149,6 +149,14 @@
             "index": "pypi",
             "version": "==3.14.0"
         },
+        "drf-yasg": {
+            "hashes": [
+                "sha256:4628c061c1605cdccdb6345df0dc8b5d3c5981c327e81a289642bf99aa92a9b2",
+                "sha256:d65387ed657d6bc157baf9de62e8d9b444857f06ed5486cf8915a9174b6be53c"
+            ],
+            "index": "pypi",
+            "version": "==1.21.6"
+        },
         "filelock": {
             "hashes": [
                 "sha256:002740518d8aa59a26b0c76e10fb8c6e15eae825d34b6fdf670333fd7b938d81",
@@ -172,6 +180,22 @@
             ],
             "markers": "python_version >= '3.7'",
             "version": "==2.5.24"
+        },
+        "inflection": {
+            "hashes": [
+                "sha256:1a29730d366e996aaacffb2f1f1cb9593dc38e2ddd30c91250c6dde09ea9b417",
+                "sha256:f38b2b640938a4f35ade69ac3d053042959b62a0f1076a5bbaa1b9526605a8a2"
+            ],
+            "markers": "python_version >= '3.5'",
+            "version": "==0.5.1"
+        },
+        "isort": {
+            "hashes": [
+                "sha256:8bef7dde241278824a6d83f44a544709b065191b95b6e50894bdc722fcba0504",
+                "sha256:f84c2818376e66cf843d497486ea8fed8700b340f308f076c6fb1229dff318b6"
+            ],
+            "index": "pypi",
+            "version": "==5.12.0"
         },
         "kombu": {
             "hashes": [
@@ -437,6 +461,14 @@
             ],
             "markers": "python_version >= '2'",
             "version": "==2023.3"
+        },
+        "uritemplate": {
+            "hashes": [
+                "sha256:4346edfc5c3b79f694bccd6d6099a322bbeb628dbf2cd86eea55a456ce5124f0",
+                "sha256:830c08b8d99bdd312ea4ead05994a38e8936266f84b9a7878232db50b044e02e"
+            ],
+            "markers": "python_version >= '3.6'",
+            "version": "==4.1.1"
         },
         "vine": {
             "hashes": [

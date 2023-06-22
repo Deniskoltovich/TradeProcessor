@@ -1,5 +1,4 @@
-import mock
-from accounts.models import Asset, Portfolio, User
+from accounts.models import Portfolio, User
 from django.db.utils import IntegrityError
 from django.test import TestCase
 
@@ -19,7 +18,7 @@ class TestAccountsModels(TestCase):
         user = User.objects.create(username='some_name', email='post@d.com')
         assert user.balance == 0.00
         assert user.avatar_url is None
-        assert user.status == user.Status.DEACTIVE
+        assert user.status == user.Status.INACTIVE
 
     def test_unique_user_email(self):
         with self.assertRaises(IntegrityError):

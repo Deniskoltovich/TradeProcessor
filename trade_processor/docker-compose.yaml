@@ -9,7 +9,7 @@ services:
       - '${APP_PORT}:8000'
 
     volumes:
-      - .:/var
+      - .:/code
     env_file:
       - .env
     depends_on:

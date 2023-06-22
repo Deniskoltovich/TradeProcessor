@@ -3,22 +3,24 @@ from assets.models import Asset
 from django.db import models
 from mixins.models import EditCreationDateMixinModel
 
+# mypy: ignore-errors
+
 
 class Order(EditCreationDateMixinModel):
     class OperationType(models.TextChoices):
-        SELL = 'Sell'
-        BUY = 'Buy'
+        SELL = "Sell"
+        BUY = "Buy"
 
     class Status(models.TextChoices):
-        FINISHED = 'Finished'
-        CANCELLED = 'Cancelled'
+        FINISHED = "Finished"
+        CANCELLED = "Cancelled"
 
     class Initializer(models.TextChoices):
-        AUTO = 'Auto'
-        MANUAL = 'Manual'
+        AUTO = "Auto"
+        MANUAL = "Manual"
 
     portfolio = models.ForeignKey(
-        Portfolio, related_name='orders', on_delete=models.CASCADE
+        Portfolio, related_name="orders", on_delete=models.CASCADE
     )
     asset = models.ForeignKey(Asset, on_delete=models.CASCADE)
     initializer = models.CharField(
@@ -34,20 +36,20 @@ class Order(EditCreationDateMixinModel):
 
 class AutoOrder(EditCreationDateMixinModel):
     class OperationType(models.TextChoices):
-        SELL = 'Sell'
-        BUY = 'Buy'
+        SELL = "Sell"
+        BUY = "Buy"
 
     class Status(models.TextChoices):
-        FINISHED = 'Finished'
-        CANCELLED = 'Cancelled'
-        OPENED = 'Opened'
+        FINISHED = "Finished"
+        CANCELLED = "Cancelled"
+        OPENED = "Opened"
 
     class PriceDirection(models.TextChoices):
-        HIGHER = 'Higher'
-        LOWER = 'Lower'
+        HIGHER = "Higher"
+        LOWER = "Lower"
 
     portfolio = models.ForeignKey(
-        Portfolio, related_name='auto_orders', on_delete=models.CASCADE
+        Portfolio, related_name="auto_orders", on_delete=models.CASCADE
     )
 
     asset = models.ForeignKey(Asset, on_delete=models.CASCADE)
