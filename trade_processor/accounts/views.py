@@ -36,27 +36,19 @@ class PortfolioViewSet(
     viewsets.GenericViewSet,
     generics.mixins.RetrieveModelMixin,
     generics.mixins.ListModelMixin,
+    generics.mixins.CreateModelMixin,
     generics.mixins.UpdateModelMixin,
     generics.mixins.DestroyModelMixin,
-    GetSerializerClassMixin,
 ):
     queryset = Portfolio.objects.all()
     serializer_class = serializers.PortfolioSerializer
 
-    serializer_action_classes = {
-        "update": serializers.UpdateUserSerializer,
-        "partial_update": serializers.UpdateUserSerializer,
-    }
-
     def get_permissions(self):
         permission_classes = []
-        if self.action == "list":
+        if self.action in ("list", "update", "partial_update", "create"):
             permission_classes = [IsAdministrator]
         elif self.action in (
-            "create",
             "destroy",
-            "update",
-            "partial_update",
             "retrieve",
         ):
             permission_classes = [IsAdministrator | IsOwner]
