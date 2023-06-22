@@ -1,5 +1,5 @@
 from assets.models import Asset
-from django.db.utils import DataError, IntegrityError
+from django.db.utils import IntegrityError
 from django.test import TestCase
 
 
