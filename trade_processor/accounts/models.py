@@ -66,3 +66,6 @@ class Portfolio(EditCreationDateMixinModel):
     assets = models.ManyToManyField(Asset)
     name = models.CharField(max_length=64, default="My portfolio")
     description = models.TextField(blank=True)
+
+    def __str__(self):
+        return f"{self.user}'s portfolio"

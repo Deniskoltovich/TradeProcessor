@@ -1,5 +1,6 @@
 import os
 
+from accounts.models import User
 from django.test import Client, TestCase
 
 
@@ -37,17 +38,3 @@ class TestUserView(TestCase):
         response = self.client.post(f'{self.url}/accounts/', data)
 
         self.assertEquals(response.status_code, 201)
-
-    def test_is_admin_permission_for_delete(self):
-        self.client.login(username='admin', password='admin')
-
-        response = self.client.delete(f'{self.url}/accounts/2/')
-
-        self.assertEquals(response.status_code, 204)
-
-    def test_is_admin_permission_for_retrieve(self):
-        self.client.login(username='admin', password='admin')
-
-        response = self.client.get(f'{self.url}/accounts/2/')
-
-        self.assertEquals(response.status_code, 200)

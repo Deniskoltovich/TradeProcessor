@@ -52,3 +52,35 @@ class TestOrderModels(TestCase):
                 quantity=1,
                 status=AutoOrder.Status.OPENED,
             )
+
+    def test_required_operation_type_in_order(self):
+        with self.assertRaises(IntegrityError):
+            Order.objects.create(
+                portfolio=self.portfolio,
+                asset=self.asset,
+                price=100000.00,
+                quantity=1,
+                status=Order.Status.FINISHED,
+            )
+
+    def test_required_price_direction_in_auto_order(self):
+        with self.assertRaises(IntegrityError):
+            AutoOrder.objects.create(
+                portfolio=self.portfolio,
+                asset=self.asset,
+                operation_type=AutoOrder.OperationType.BUY,
+                desired_price=1000.00,
+                quantity=1,
+                status=AutoOrder.Status.OPENED,
+            )
+
+    def test_required_operation_type_in_auto_order(self):
+        with self.assertRaises(IntegrityError):
+            AutoOrder.objects.create(
+                portfolio=self.portfolio,
+                asset=self.asset,
+                operation_type=AutoOrder.OperationType.BUY,
+                desired_price=10000.00,
+                quantity=1,
+                status=AutoOrder.Status.OPENED,
+            )

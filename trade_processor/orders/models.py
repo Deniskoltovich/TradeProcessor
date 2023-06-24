@@ -27,11 +27,16 @@ class Order(EditCreationDateMixinModel):
         max_length=6, choices=Initializer.choices, default=Initializer.MANUAL
     )
     operation_type = models.CharField(
-        max_length=4, choices=OperationType.choices
+        max_length=4, choices=OperationType.choices, default=None, null=False
     )
     price = models.DecimalField(max_digits=11, decimal_places=2, blank=False)
     quantity = models.IntegerField(blank=False)
-    status = models.CharField(max_length=9, choices=Status.choices)
+    status = models.CharField(
+        max_length=9, choices=Status.choices, default=Status.FINISHED
+    )
+
+    class Meta:
+        ordering = ['-updated_at', '-created_at']
 
 
 class AutoOrder(EditCreationDateMixinModel):
@@ -54,7 +59,7 @@ class AutoOrder(EditCreationDateMixinModel):
 
     asset = models.ForeignKey(Asset, on_delete=models.CASCADE)
     operation_type = models.CharField(
-        max_length=4, choices=OperationType.choices
+        max_length=4, choices=OperationType.choices, default=None, null=False
     )
 
     desired_price = models.DecimalField(
@@ -63,6 +68,8 @@ class AutoOrder(EditCreationDateMixinModel):
     quantity = models.IntegerField(blank=False)
 
     price_direction = models.CharField(
-        choices=PriceDirection.choices, max_length=6
+        choices=PriceDirection.choices, max_length=6, default=None, null=False
     )
-    status = models.CharField(max_length=9, choices=Status.choices)
+    status = models.CharField(
+        max_length=9, choices=Status.choices, default=Status.OPENED
+    )

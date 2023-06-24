@@ -1,22 +1,22 @@
 from accounts.models import Portfolio
+from accounts.serializers import PortfolioSerializer
+from assets.models import Asset
+from assets.serializers import AssetSerializer
 from orders.models import AutoOrder, Order
 from rest_framework import serializers
 
 # mypy: ignore-errors
 
 
-class OrderSerializer(serializers.ModelSerializer):
-    portfolio_id = serializers.PrimaryKeyRelatedField(
-        many=False, read_only=True
-    )
-    asset = serializers.SlugRelatedField(
-        many=False, read_only=True, slug_field="name"
-    )
+class ListRetrieveOrderSerializer(serializers.ModelSerializer):
+    portfolio = PortfolioSerializer(many=False, read_only=True)
+    asset = AssetSerializer(many=False, read_only=True)
 
     class Meta:
         model = Order
         fields = [
-            "portfolio_id",
+            'id',
+            "portfolio",
             "asset",
             "initializer",
             "operation_type",
@@ -25,12 +25,24 @@ class OrderSerializer(serializers.ModelSerializer):
             "status",
         ]
 
+
+class CreateOrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = [
+            "portfolio",
+            "asset",
+            "initializer",
+            "operation_type",
+            "price",
+            "quantity",
+        ]
+
     def validate(self, data):
+        print('validation\n\n\n\n\n')
         if data["operation_type"] == Order.OperationType.SELL:
             return data
-        user_balance = Portfolio.objects.get(
-            pk=data["portfolio_id"]
-        ).user.balance
+        user_balance = data["portfolio"].user.balance
         if data["price"] * data["quantity"] > user_balance:
             raise serializers.ValidationError(
                 "Not enough balance for this operation"
