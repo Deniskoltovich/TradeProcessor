@@ -1,7 +1,8 @@
+import django.db
 from accounts.permissions import IsAdministrator, IsAnalyst, IsOwner, IsUser
 from mixins.get_serializer_class_mixin import GetSerializerClassMixin
+from orders import serializers
 from orders.models import Order
-from orders.serializers import ListRetrieveOrderSerializer
 from orders.services.order_create_service import OrderCreateService
 from rest_framework import generics, viewsets
 from rest_framework.exceptions import ValidationError
@@ -18,7 +19,10 @@ class OrderViewSet(
     GetSerializerClassMixin,
 ):
     queryset = Order.objects.all()
-    serializer_class = ListRetrieveOrderSerializer
+    serializer_class = serializers.ListRetrieveOrderSerializer
+    serializer_action_classes = {
+        'create': serializers.CreateOrderSerializer,
+    }
     permission_action_classes = {
         'list': (IsAdministrator | IsAnalyst,),
         'retrieve': (IsAdministrator | IsAnalyst | IsOwner,),
@@ -38,6 +42,10 @@ class OrderViewSet(
 
     def create(self, request, *args, **kwargs):
         try:
-            return Response(OrderCreateService().execute(request.data))
+            return Response(
+                OrderCreateService().execute(request.user, request.data)
+            )
         except ValidationError:
             return Response("Invalid data", status=405)
+        except django.db.IntegrityError as e:
+            return Response(e, exception=True)

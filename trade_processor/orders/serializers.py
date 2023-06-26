@@ -1,4 +1,4 @@
-from accounts.models import Portfolio
+from accounts.models import Portfolio, PortfolioAsset
 from accounts.serializers import PortfolioSerializer
 from assets.models import Asset
 from assets.serializers import AssetSerializer
@@ -37,17 +37,6 @@ class CreateOrderSerializer(serializers.ModelSerializer):
             "price",
             "quantity",
         ]
-
-    def validate(self, data):
-        print('validation\n\n\n\n\n')
-        if data["operation_type"] == Order.OperationType.SELL:
-            return data
-        user_balance = data["portfolio"].user.balance
-        if data["price"] * data["quantity"] > user_balance:
-            raise serializers.ValidationError(
-                "Not enough balance for this operation"
-            )
-        return data
 
 
 class AutoOrderSerializer(serializers.ModelSerializer):

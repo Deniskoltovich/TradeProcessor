@@ -1,6 +1,7 @@
 import jwt
 from django.conf import settings
 from django.http import JsonResponse
+from django.urls import reverse
 
 
 class JWTMiddleware:
@@ -19,6 +20,8 @@ class JWTMiddleware:
                 '/accounts/users/login/',
                 '/accounts/users/refresh_token/',
                 '/api/doc/',
+                reverse('admin:index'),
+                reverse('admin:login'),
             ]
             or request.user.is_superuser
         ):

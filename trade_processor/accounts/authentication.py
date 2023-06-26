@@ -7,10 +7,12 @@ from rest_framework.authentication import BaseAuthentication
 
 class JWTAuthentication(BaseAuthentication):
     def authenticate(self, request):
-
         User = get_user_model()
-        authorization_header = request.headers.get('Authorization')
 
+        if request.path.endswith('/login/'):
+            return None
+
+        authorization_header = request.headers.get('Authorization')
         if not authorization_header:
             return None
         try:
@@ -24,7 +26,6 @@ class JWTAuthentication(BaseAuthentication):
             raise exceptions.AuthenticationFailed('access_token expired')
         except IndexError:
             raise exceptions.AuthenticationFailed('Token prefix missing')
-
         user = User.objects.filter(username=payload['username']).first()
         if user is None:
             raise exceptions.AuthenticationFailed('User not found')

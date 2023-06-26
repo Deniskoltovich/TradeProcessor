@@ -1,5 +1,6 @@
 import jwt
 from accounts import serializers
+from accounts.authentication import JWTAuthentication
 from accounts.models import Portfolio, User
 from accounts.permissions import IsAdministrator, IsOwner, IsUser
 from accounts.services.auth_service import AuthService
@@ -22,6 +23,8 @@ class UserViewSet(
     generics.mixins.CreateModelMixin,
     GetSerializerClassMixin,
 ):
+    authentication_classes = [JWTAuthentication]
+
     queryset = User.objects.all()
     serializer_class = serializers.ListUserSerializer
 
@@ -36,6 +39,7 @@ class UserViewSet(
         'update': (IsOwner | IsAdministrator,),
         'partial_update': (IsOwner | IsAdministrator,),
         'create': (AllowAny,),
+        'login': (AllowAny,),
     }
 
     def get_permissions(self):
@@ -56,7 +60,7 @@ class UserViewSet(
     def create(self, request, *args, **kwargs):
         return Response(CreateUserService().execute(request), status=201)
 
-    @permission_classes([IsUser])
+    @permission_classes([AllowAny])
     @action(
         detail=False,
         methods=['get'],
@@ -65,11 +69,16 @@ class UserViewSet(
     def refresh_token(self, request):
         return Response(AuthService().refresh(request))
 
-    @permission_classes([AllowAny])
+    @permission_classes(
+        [
+            AllowAny,
+        ]
+    )
     @action(
         detail=False,
         methods=['post'],
         url_path='login',
+        permission_classes=[AllowAny],
     )
     def login(self, request):
         data = AuthService().login(request)
@@ -83,28 +92,36 @@ class UserViewSet(
         }
         return response
 
-    @permission_classes([IsOwner])
+    @permission_classes([IsUser])
     @action(
         detail=True,
         methods=['post'],
-        url_path='subscriptions/(?P<asset_id>[^/.]+)',
+        url_path='subscriptions/add',
     )
-    def add_subscription(self, request, pk, asset_id):
-        return Response(SubscriptionService().add(request.user, asset_id))
+    def add_subscription(self, request, pk):
+        return Response(
+            SubscriptionService().add(
+                request.user, request.data.get('asset_id')
+            )
+        )
 
-    @permission_classes([IsOwner])
+    @permission_classes([IsUser])
     @action(detail=True, methods=['get'], url_path='subscriptions')
-    def list_subscription(self, request, pk):
+    def list_subscription(self, request, pk=None):
         return Response(SubscriptionService().list(request.user))
 
     @permission_classes([IsOwner])
     @action(
         detail=True,
         methods=['DELETE'],
-        url_path='subscriptions/(?P<asset_id>[^/.]+)/delete',
+        url_path='subscriptions/delete',
     )
-    def delete_subscription(self, request, pk, asset_id):
-        return Response(SubscriptionService().delete(request.user, asset_id))
+    def delete_subscription(self, request, pk):
+        return Response(
+            SubscriptionService().delete(
+                request.user, request.data.get('asset_id')
+            )
+        )
 
 
 class PortfolioViewSet(

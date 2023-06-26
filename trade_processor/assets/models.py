@@ -17,5 +17,9 @@ class Asset(models.Model):
         max_length=14, choices=Type.choices, null=False, default=None
     )
 
+    current_price = models.DecimalField(
+        max_digits=11, decimal_places=2, blank=False
+    )
+
     def __str__(self):
         return self.name
