@@ -16,16 +16,18 @@ class AssetViewSet(
     queryset = Asset.objects.all()
     serializer_class = AssetSerializer
 
-    def get_permissions(self):
-        permission_classes = []
-        if self.action in (
-            "destroy",
-            "update",
-            "partial_update",
-            'create',
-        ):
-            permission_classes = [IsAdministrator]
-        else:
-            permission_classes = [IsAdministrator | IsAnalyst | IsUser]
+    permission_action_classes = {
+        'list': (IsAdministrator | IsAnalyst | IsUser,),
+        'retrieve': (IsAdministrator | IsAnalyst | IsUser,),
+        'update': (IsAdministrator,),
+        'partial_update': (IsAdministrator,),
+        'destroy': (IsAdministrator,),
+    }
 
-        return [permission() for permission in permission_classes]
+    def get_permissions(self):
+        return [
+            permission()
+            for permission in self.permission_action_classes.get(
+                self.action, (IsUser,)
+            )
+        ]

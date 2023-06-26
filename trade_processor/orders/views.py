@@ -19,23 +19,22 @@ class OrderViewSet(
 ):
     queryset = Order.objects.all()
     serializer_class = ListRetrieveOrderSerializer
+    permission_action_classes = {
+        'list': (IsAdministrator | IsAnalyst,),
+        'retrieve': (IsAdministrator | IsAnalyst | IsOwner,),
+        'update': (IsAdministrator,),
+        'partial_update': (IsAdministrator,),
+        'destroy': (IsAdministrator,),
+        'create': (IsUser | IsAdministrator,),
+    }
 
     def get_permissions(self):
-        permission_classes = []
-        if self.action in (
-            "destroy",
-            "update",
-            "partial_update",
-        ):
-            permission_classes = [IsAdministrator]
-        elif self.action == 'create':
-            permission_classes = [IsUser | IsAdministrator]
-        elif self.action == 'list':
-            permission_classes = [IsAdministrator | IsAnalyst]
-        elif self.action == 'retrieve':
-            permission_classes = [IsAdministrator | IsAnalyst | IsOwner]
-
-        return [permission() for permission in permission_classes]
+        return [
+            permission()
+            for permission in self.permission_action_classes.get(
+                self.action, (IsUser,)
+            )
+        ]
 
     def create(self, request, *args, **kwargs):
         try:
