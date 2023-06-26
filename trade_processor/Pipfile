@@ -17,6 +17,7 @@ python-dotenv = "*"
 mock = "*"
 drf-yasg = "*"
 isort = "*"
+pyjwt = "*"
 
 [dev-packages]
 
