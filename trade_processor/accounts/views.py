@@ -30,16 +30,21 @@ class UserViewSet(
         'update': serializers.PartialUpdateUserSerializer,
         'create': serializers.CreateUserSerializer,
     }
+    permission_action_classes = {
+        'list': (IsAdministrator,),
+        'retrieve': (IsAdministrator | IsOwner,),
+        'update': (IsOwner | IsAdministrator,),
+        'partial_update': (IsOwner | IsAdministrator,),
+        'create': (AllowAny,),
+    }
 
     def get_permissions(self):
-        permission_classes = []
-        if self.action == "list":
-            permission_classes = [IsAdministrator]
-        elif self.action in ('retrieve', "partial_update"):
-            permission_classes = [IsAdministrator, IsOwner]
-        elif self.action == 'create':
-            permission_classes = [AllowAny]
-        return [permission() for permission in permission_classes]
+        return [
+            permission()
+            for permission in self.permission_action_classes.get(
+                self.action, (IsUser,)
+            )
+        ]
 
     def update(self, request, *args, **kwargs):
         if request.user.Role.ADMIN:
@@ -67,11 +72,16 @@ class UserViewSet(
         url_path='login',
     )
     def login(self, request):
-        response = AuthService().login(request)
-        if response:
-            return Response(response, status=200)
-
-        return Response({'error': 'Invalid credentials'}, status=401)
+        data = AuthService().login(request)
+        response = Response()
+        response.set_cookie(
+            key='refreshtoken', value=data.get('refresh_token'), httponly=True
+        )
+        response.data = {
+            'access_token': data.get('access_token'),
+            'user': data.get('serialized_user'),
+        }
+        return response
 
     @permission_classes([IsOwner])
     @action(

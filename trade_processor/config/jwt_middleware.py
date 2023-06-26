@@ -12,12 +12,16 @@ class JWTMiddleware:
         Method used to check authentication for a user by JWT
         """
         # Skip JWT verification for specific paths
-        if request.path_info in [
-            '/accounts/users/',
-            'accounts/users/login/',
-            'accounts/users/refresh_token/',
-            '/api/doc/',
-        ]:
+        if (
+            request.path_info
+            in [
+                '/accounts/users/',
+                '/accounts/users/login/',
+                '/accounts/users/refresh_token/',
+                '/api/doc/',
+            ]
+            or request.user.is_superuser
+        ):
             return self.get_response(request)
 
         # Get the JWT token from the request headers

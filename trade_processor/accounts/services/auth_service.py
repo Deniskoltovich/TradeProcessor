@@ -2,8 +2,11 @@ from datetime import datetime, timedelta
 
 import jwt
 from accounts.models import User
+from accounts.serializers import ListUserSerializer
+from accounts.utils import token_gen
 from config import settings
 from django.contrib.auth import authenticate
+from rest_framework import exceptions
 
 
 class AuthService:
@@ -32,13 +35,24 @@ class AuthService:
     def login(request):
         username = request.data.get('username')
         password = request.data.get('password')
-
-        user = authenticate(request, username=username, password=password)
-        if user:
-            token = jwt.encode(
-                {'username': username}, settings.SECRET_KEY, algorithm='HS256'
+        if (username is None) or (password is None):
+            raise exceptions.AuthenticationFailed(
+                'username and password required'
             )
 
-            return {'token': token}
-        else:
-            return None
+        user = User.objects.filter(username=username).first()
+        if user is None:
+            raise exceptions.AuthenticationFailed('user not found')
+        if not user.check_password(password):
+            raise exceptions.AuthenticationFailed('wrong password')
+
+        serialized_user = ListUserSerializer(user).data
+
+        access_token = token_gen.generate_access_token(user)
+        refresh_token = token_gen.generate_refresh_token(user)
+        data = {
+            'refresh_token': refresh_token,
+            'access_token': access_token,
+            'user': serialized_user,
+        }
+        return data

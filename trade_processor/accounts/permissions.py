@@ -13,7 +13,6 @@ class IsAdministrator(permissions.BasePermission):
 
 class IsOwner(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-
         if (
             request.user
             and request.user.is_authenticated
@@ -21,7 +20,7 @@ class IsOwner(permissions.BasePermission):
         ):
             if type(obj) == User:
 
-                return request.user == obj.user
+                return request.user == obj
             return obj.portfolio.user == request.user
         return False
 
