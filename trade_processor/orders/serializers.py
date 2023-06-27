@@ -1,9 +1,10 @@
-from accounts.models import Portfolio
+from rest_framework import serializers
+
+from accounts.models import Portfolio, PortfolioAsset
 from accounts.serializers import PortfolioSerializer
 from assets.models import Asset
 from assets.serializers import AssetSerializer
 from orders.models import AutoOrder, Order
-from rest_framework import serializers
 
 # mypy: ignore-errors
 
@@ -38,33 +39,19 @@ class CreateOrderSerializer(serializers.ModelSerializer):
             "quantity",
         ]
 
-    def validate(self, data):
-        print('validation\n\n\n\n\n')
-        if data["operation_type"] == Order.OperationType.SELL:
-            return data
-        user_balance = data["portfolio"].user.balance
-        if data["price"] * data["quantity"] > user_balance:
-            raise serializers.ValidationError(
-                "Not enough balance for this operation"
-            )
-        return data
 
-
-class AutoOrderSerializer(serializers.ModelSerializer):
-    portfolio_id = serializers.PrimaryKeyRelatedField(
-        many=True, read_only=True
-    )
-    asset = serializers.SlugRelatedField(
-        many=False, read_only=True, slug_field="name"
-    )
+class ListAutoOrderSerializer(serializers.ModelSerializer):
+    portfolio = PortfolioSerializer(many=False, read_only=True)
+    asset = AssetSerializer(many=False, read_only=True)
 
     class Meta:
         model = Order
         fields = [
-            "portfolio_id",
+            "portfolio",
             "asset",
             "operation_type",
-            "desired_price" "price_direction",
+            "desired_price",
+            "price_direction",
             "quantity",
             "status",
         ]

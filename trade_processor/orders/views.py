@@ -1,11 +1,14 @@
-from accounts.permissions import IsAdministrator, IsAnalyst, IsOwner, IsUser
-from mixins.get_serializer_class_mixin import GetSerializerClassMixin
-from orders.models import Order
-from orders.serializers import ListRetrieveOrderSerializer
-from orders.services.order_create_service import OrderCreateService
+import django.db
 from rest_framework import generics, viewsets
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
+
+from accounts.models import User
+from accounts.permissions import IsAdministrator, IsAnalyst, IsOwner, IsUser
+from mixins.get_serializer_class_mixin import GetSerializerClassMixin
+from orders import serializers
+from orders.models import Order
+from orders.services.order_create_service import OrderCreateService
 
 
 class OrderViewSet(
@@ -18,27 +21,34 @@ class OrderViewSet(
     GetSerializerClassMixin,
 ):
     queryset = Order.objects.all()
-    serializer_class = ListRetrieveOrderSerializer
+    serializer_class = serializers.ListRetrieveOrderSerializer
+    serializer_action_classes = {
+        'create': serializers.CreateOrderSerializer,
+    }
+    permission_action_classes = {
+        'list': (IsAdministrator | IsAnalyst,),
+        'retrieve': (IsAdministrator | IsAnalyst | IsOwner,),
+        'update': (IsAdministrator,),
+        'partial_update': (IsAdministrator,),
+        'destroy': (IsAdministrator,),
+        'create': (IsUser | IsAdministrator,),
+        'list_transactions': (IsAdministrator, IsOwner, IsAnalyst),
+    }
 
     def get_permissions(self):
-        permission_classes = []
-        if self.action in (
-            "destroy",
-            "update",
-            "partial_update",
-        ):
-            permission_classes = [IsAdministrator]
-        elif self.action == 'create':
-            permission_classes = [IsUser | IsAdministrator]
-        elif self.action == 'list':
-            permission_classes = [IsAdministrator | IsAnalyst]
-        elif self.action == 'retrieve':
-            permission_classes = [IsAdministrator | IsAnalyst | IsOwner]
-
-        return [permission() for permission in permission_classes]
+        return [
+            permission()
+            for permission in self.permission_action_classes.get(
+                self.action, (IsUser,)
+            )
+        ]
 
     def create(self, request, *args, **kwargs):
         try:
-            return Response(OrderCreateService().execute(request.data))
+            return Response(
+                OrderCreateService().execute(request.user, request.data)
+            )
         except ValidationError:
             return Response("Invalid data", status=405)
+        except django.db.IntegrityError as e:
+            return Response(e.args, exception=True)

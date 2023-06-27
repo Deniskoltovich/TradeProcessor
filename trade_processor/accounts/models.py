@@ -63,9 +63,17 @@ class Portfolio(EditCreationDateMixinModel):
     user = models.ForeignKey(
         User, related_name="portfolios", on_delete=models.CASCADE
     )
-    assets = models.ManyToManyField(Asset)
+    assets = models.ManyToManyField(
+        Asset, through='PortfolioAsset', verbose_name='Assets'
+    )
     name = models.CharField(max_length=64, default="My portfolio")
     description = models.TextField(blank=True)
 
     def __str__(self):
         return f"{self.user}'s portfolio"
+
+
+class PortfolioAsset(models.Model):
+    asset = models.ForeignKey(Asset, on_delete=models.CASCADE)
+    portfolio = models.ForeignKey(Portfolio, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=0)

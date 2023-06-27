@@ -33,11 +33,25 @@ class ListUserSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             "id",
+            'username',
             "email",
             "avatar_url",
             "subscriptions",
             "balance",
             "portfolios_id",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class CreateUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [
+            'username',
+            "email",
+            "avatar_url",
+            'password',
             "created_at",
             "updated_at",
         ]
