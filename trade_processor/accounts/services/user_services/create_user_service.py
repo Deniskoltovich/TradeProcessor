@@ -1,4 +1,5 @@
 import jwt
+
 from accounts.models import User
 from config import settings
 

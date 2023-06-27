@@ -1,19 +1,25 @@
 import jwt
 from rest_framework import exceptions, generics, viewsets
-from rest_framework.decorators import action, permission_classes
+from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from accounts import serializers
 from accounts.authentication import JWTAuthentication
-from accounts.models import Portfolio, User
-from accounts.permissions import IsAdministrator, IsAnalyst, IsOwner, IsUser
+from accounts.models import User
+from accounts.permissions import (
+    IsAdministrator,
+    IsAnalyst,
+    IsOwner,
+    IsUser,
+)
 from accounts.services import (
     auth_service,
-    create_user_service,
     list_transaction_service,
-    portfolio_service,
     subscription_service,
+)
+from accounts.services.user_services import (
+    create_user_service,
     update_user_service,
 )
 from mixins.get_serializer_class_mixin import GetSerializerClassMixin
@@ -149,40 +155,4 @@ class UserViewSet(
             subscription_service.SubscriptionService().delete(
                 request.user, request.data.get('asset_id')
             )
-        )
-
-
-class PortfolioViewSet(
-    viewsets.GenericViewSet,
-    generics.mixins.RetrieveModelMixin,
-    generics.mixins.ListModelMixin,
-    generics.mixins.CreateModelMixin,
-    generics.mixins.UpdateModelMixin,
-    generics.mixins.DestroyModelMixin,
-):
-    queryset = Portfolio.objects.all()
-    serializer_class = serializers.PortfolioSerializer
-
-    permission_action_classes = {
-        'list': (IsAdministrator,),
-        'retrieve': (IsAdministrator | IsOwner,),
-        'update': (IsAdministrator,),
-        'partial_update': (IsAdministrator,),
-        'destroy': (IsAdministrator | IsOwner,),
-        'create': (IsAdministrator | IsUser,),
-        'my_portfolios': (IsUser,),
-    }
-
-    def get_permissions(self):
-        return [
-            permission()
-            for permission in self.permission_action_classes.get(
-                self.action, (IsUser,)
-            )
-        ]
-
-    @action(detail=False, methods=['get'], url_path='my')
-    def my_portfolios(self, request):
-        return Response(
-            portfolio_service.PortfolioService().find_my(request.user)
         )

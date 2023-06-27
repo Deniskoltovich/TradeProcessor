@@ -1,5 +1,6 @@
-from accounts import serializers
 from django.contrib.auth import logout
+
+from accounts import serializers
 
 
 class UpdateUserService:
