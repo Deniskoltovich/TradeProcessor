@@ -1,5 +1,7 @@
 from accounts.models import Portfolio
-from accounts.serializers import PortfolioSerializer
+from accounts.serializers.portfolio_serializers import (
+    PortfolioSerializer,
+)
 
 
 class PortfolioService:

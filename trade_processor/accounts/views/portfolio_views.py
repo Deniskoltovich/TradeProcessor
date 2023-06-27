@@ -2,9 +2,9 @@ from rest_framework import generics, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from accounts import serializers
 from accounts.models import Portfolio
 from accounts.permissions import IsAdministrator, IsOwner, IsUser
+from accounts.serializers import portfolio_serializers
 from accounts.services import portfolio_service
 
 
@@ -17,7 +17,7 @@ class PortfolioViewSet(
     generics.mixins.DestroyModelMixin,
 ):
     queryset = Portfolio.objects.all()
-    serializer_class = serializers.PortfolioSerializer
+    serializer_class = portfolio_serializers.PortfolioSerializer
 
     permission_action_classes = {
         'list': (IsAdministrator,),
@@ -42,10 +42,10 @@ class PortfolioViewSet(
 
         """
         The my_portfolios function is a GET request that returns all
-         of the portfolios
+         the portfolios
         that are associated with the user who made the request. The
          function uses
-        the PortfolioService class to find all of the portfolios that
+        the PortfolioService class to find all the portfolios that
          are associated with
         the user who made this request.
 

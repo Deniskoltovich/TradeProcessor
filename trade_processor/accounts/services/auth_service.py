@@ -4,7 +4,7 @@ import jwt
 from rest_framework import exceptions
 
 from accounts.models import User
-from accounts.serializers import ListUserSerializer
+from accounts.serializers.user_serializers import ListUserSerializer
 from accounts.utils import token_gen
 from config import settings
 

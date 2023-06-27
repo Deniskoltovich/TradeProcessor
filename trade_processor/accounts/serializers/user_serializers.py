@@ -1,26 +1,8 @@
-from accounts.models import Portfolio, User
-from assets.serializers import AssetSerializer
 from rest_framework import serializers
 
+from accounts.models import User
+
 # mypy: ignore-errors
-
-
-class PortfolioSerializer(serializers.ModelSerializer):
-    assets = serializers.SlugRelatedField(
-        many=True, read_only=True, slug_field="name"
-    )
-
-    class Meta:
-        model = Portfolio
-        fields = [
-            'id',
-            'user',
-            "name",
-            "description",
-            "assets",
-            "created_at",
-            "updated_at",
-        ]
 
 
 class ListUserSerializer(serializers.ModelSerializer):
@@ -70,8 +52,3 @@ class PasswordUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['password']
-
-
-class SubscriptionSerializer(serializers.Serializer):
-    user = ListUserSerializer(many=False)
-    asset = AssetSerializer(many=False)

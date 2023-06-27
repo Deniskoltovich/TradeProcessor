@@ -4,7 +4,6 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from accounts import serializers
 from accounts.authentication import JWTAuthentication
 from accounts.models import User
 from accounts.permissions import (
@@ -13,6 +12,7 @@ from accounts.permissions import (
     IsOwner,
     IsUser,
 )
+from accounts.serializers import user_serializers
 from accounts.services import (
     auth_service,
     list_transaction_service,
@@ -36,12 +36,12 @@ class UserViewSet(
     authentication_classes = [JWTAuthentication]
 
     queryset = User.objects.all()
-    serializer_class = serializers.ListUserSerializer
+    serializer_class = user_serializers.ListUserSerializer
 
     serializer_action_classes = {
-        "partial_update": serializers.PartialUpdateUserSerializer,
-        'update': serializers.PartialUpdateUserSerializer,
-        'create': serializers.CreateUserSerializer,
+        "partial_update": user_serializers.PartialUpdateUserSerializer,
+        'update': user_serializers.PartialUpdateUserSerializer,
+        'create': user_serializers.CreateUserSerializer,
     }
     permission_action_classes = {
         'list': (IsAdministrator,),
