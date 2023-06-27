@@ -9,7 +9,7 @@ def generate_access_token(user):
     access_token_payload = {
         'username': user.username,
         'exp': datetime.datetime.utcnow()
-        + datetime.timedelta(days=0, minutes=5),
+        + datetime.timedelta(days=0, minutes=20),
         'iat': datetime.datetime.utcnow(),
     }
     access_token = jwt.encode(
@@ -19,6 +19,7 @@ def generate_access_token(user):
 
 
 def generate_refresh_token(user):
+
     refresh_token_payload = {
         'username': user.username,
         'exp': datetime.datetime.utcnow() + datetime.timedelta(days=7),
@@ -27,5 +28,4 @@ def generate_refresh_token(user):
     refresh_token = jwt.encode(
         refresh_token_payload, settings.SECRET_KEY, algorithm='HS256'
     )
-
     return refresh_token

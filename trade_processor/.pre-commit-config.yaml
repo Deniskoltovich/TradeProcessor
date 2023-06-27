@@ -33,7 +33,7 @@ repos:
           - --strict-optional
 
 
-  - repo: https://github.com/pycqa/isort 
-    rev: 5.12.0 
-    hooks: 
+  - repo: https://github.com/pycqa/isort
+    rev: 5.12.0
+    hooks:
       - id: isort

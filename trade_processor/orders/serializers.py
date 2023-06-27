@@ -1,9 +1,10 @@
+from rest_framework import serializers
+
 from accounts.models import Portfolio, PortfolioAsset
 from accounts.serializers import PortfolioSerializer
 from assets.models import Asset
 from assets.serializers import AssetSerializer
 from orders.models import AutoOrder, Order
-from rest_framework import serializers
 
 # mypy: ignore-errors
 
@@ -39,21 +40,18 @@ class CreateOrderSerializer(serializers.ModelSerializer):
         ]
 
 
-class AutoOrderSerializer(serializers.ModelSerializer):
-    portfolio_id = serializers.PrimaryKeyRelatedField(
-        many=True, read_only=True
-    )
-    asset = serializers.SlugRelatedField(
-        many=False, read_only=True, slug_field="name"
-    )
+class ListAutoOrderSerializer(serializers.ModelSerializer):
+    portfolio = PortfolioSerializer(many=False, read_only=True)
+    asset = AssetSerializer(many=False, read_only=True)
 
     class Meta:
         model = Order
         fields = [
-            "portfolio_id",
+            "portfolio",
             "asset",
             "operation_type",
-            "desired_price" "price_direction",
+            "desired_price",
+            "price_direction",
             "quantity",
             "status",
         ]

@@ -1,35 +1,37 @@
 from datetime import datetime, timedelta
 
 import jwt
+from rest_framework import exceptions
+
 from accounts.models import User
 from accounts.serializers import ListUserSerializer
 from accounts.utils import token_gen
 from config import settings
-from django.contrib.auth import authenticate
-from rest_framework import exceptions
 
 
 class AuthService:
     @staticmethod
     def refresh(request):
-        username = request.user.username
+        refresh_token = request.COOKIES.get(
+            'refreshtoken'
+        )  # Retrieve refresh token from the cookie
 
-        current_token = request.headers.get('Authorization', '').split()[1]
-        try:
-            jwt.decode(
-                current_token, settings.SECRET_KEY, algorithms=['HS256']
-            )
-        except jwt.ExpiredSignatureError:
-            expiration_time = datetime.utcnow() + timedelta(days=7)
-            token = jwt.encode(
-                {'username': username, 'exp': expiration_time},
-                settings.SECRET_KEY,
-                algorithm='HS256',
-            )
+        if not refresh_token:
+            raise exceptions.AuthenticationFailed()
 
-            return {'token': token}
+        decoded_token = jwt.decode(
+            refresh_token, settings.SECRET_KEY, algorithms=['HS256']
+        )
+        username = decoded_token.get('username')
 
-        return {'token': current_token}
+        expiration_time = datetime.utcnow() + timedelta(days=0, minutes=20)
+        access_token = jwt.encode(
+            {'username': username, 'exp': expiration_time},
+            settings.SECRET_KEY,
+            algorithm='HS256',
+        )
+
+        return {'access_token': access_token}
 
     @staticmethod
     def login(request):

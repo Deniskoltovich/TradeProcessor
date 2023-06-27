@@ -1,12 +1,14 @@
 import django.db
+from rest_framework import generics, viewsets
+from rest_framework.exceptions import ValidationError
+from rest_framework.response import Response
+
+from accounts.models import User
 from accounts.permissions import IsAdministrator, IsAnalyst, IsOwner, IsUser
 from mixins.get_serializer_class_mixin import GetSerializerClassMixin
 from orders import serializers
 from orders.models import Order
 from orders.services.order_create_service import OrderCreateService
-from rest_framework import generics, viewsets
-from rest_framework.exceptions import ValidationError
-from rest_framework.response import Response
 
 
 class OrderViewSet(
@@ -30,6 +32,7 @@ class OrderViewSet(
         'partial_update': (IsAdministrator,),
         'destroy': (IsAdministrator,),
         'create': (IsUser | IsAdministrator,),
+        'list_transactions': (IsAdministrator, IsOwner, IsAnalyst),
     }
 
     def get_permissions(self):
@@ -48,4 +51,4 @@ class OrderViewSet(
         except ValidationError:
             return Response("Invalid data", status=405)
         except django.db.IntegrityError as e:
-            return Response(e, exception=True)
+            return Response(e.args, exception=True)
