@@ -39,6 +39,20 @@ class PortfolioViewSet(
 
     @action(detail=False, methods=['get'], url_path='my')
     def my_portfolios(self, request):
+
+        """
+        The my_portfolios function is a GET request that returns all
+         of the portfolios
+        that are associated with the user who made the request. The
+         function uses
+        the PortfolioService class to find all of the portfolios that
+         are associated with
+        the user who made this request.
+
+        :param self: Represent the instance of the class
+        :param request: Get the user from the request object
+        :return: A list of all the portfolios that belong to a user
+        """
         return Response(
             portfolio_service.PortfolioService().find_my(request.user)
         )

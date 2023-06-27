@@ -1,12 +1,9 @@
 from django.urls import include, path
+from recommendations.views import RecommendationViewSet
 from rest_framework.routers import DefaultRouter
 
-from accounts.views.portfolio_views import PortfolioViewSet
-from accounts.views.user_views import UserViewSet
-
 router = DefaultRouter()
-router.register("portfolios", PortfolioViewSet)
-router.register("users", UserViewSet)
+router.register("", RecommendationViewSet)
 
 urlpatterns = [
     path("", include(router.urls)),

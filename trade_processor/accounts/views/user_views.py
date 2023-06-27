@@ -88,6 +88,19 @@ class UserViewSet(
         url_path='transactions',
     )
     def list_transactions(self, request, pk):
+
+        """
+        The list_transactions function is used to list all transactions
+         for a given account.
+        It takes in the request and pk (primary key) of the account,
+         and returns a response containing
+        all transactions associated with that account.
+
+        :param self: Represent the instance of the class
+        :param request: Get the request object
+        :param pk: Retrieve the transactions of a specific account
+        :return: A list of transactions' data
+        """
         return Response(
             list_transaction_service.ListTransactions().execute(pk)
         )
@@ -116,6 +129,7 @@ class UserViewSet(
         permission_classes=[AllowAny],
     )
     def login(self, request):
+
         data = auth_service.AuthService().login(request)
         response = Response()
         response.set_cookie(
@@ -133,6 +147,17 @@ class UserViewSet(
         url_path='subscriptions/add',
     )
     def add_subscription(self, request, pk):
+
+        """
+        The add_subscription function is used to add a subscription
+         for the user.
+
+        :param self: Represent the instance of the class
+        :param request: Get the user and asset_id from the request
+        :param pk: Get the primary key of the asset that is being
+            subscribed to
+        :return: A response object
+        """
         return Response(
             subscription_service.SubscriptionService().add(
                 request.user, request.data.get('asset_id')
@@ -141,6 +166,16 @@ class UserViewSet(
 
     @action(detail=True, methods=['get'], url_path='subscriptions')
     def list_subscription(self, request, pk=None):
+
+        """
+        The list_subscription function is used to list all the
+         subscriptions of a user.
+
+        :param self: Represent the instance of the object itself
+        :param request: Get the user from the request object
+        :param pk: Get the primary key of the object
+        :return: A list of all the subscriptions for a user
+        """
         return Response(
             subscription_service.SubscriptionService().list(request.user)
         )
@@ -151,6 +186,7 @@ class UserViewSet(
         url_path='subscriptions/delete',
     )
     def delete_subscription(self, request, pk):
+
         return Response(
             subscription_service.SubscriptionService().delete(
                 request.user, request.data.get('asset_id')

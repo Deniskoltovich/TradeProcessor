@@ -1,8 +1,14 @@
-from accounts.permissions import IsAdministrator, IsAnalyst, IsOwner, IsUser
+from rest_framework import generics, viewsets
+
+from accounts.permissions import (
+    IsAdministrator,
+    IsAnalyst,
+    IsOwner,
+    IsUser,
+)
 from assets.models import Asset
 from assets.serializers import AssetSerializer
 from mixins.get_serializer_class_mixin import GetSerializerClassMixin
-from rest_framework import generics, viewsets
 
 
 class AssetViewSet(
@@ -25,6 +31,7 @@ class AssetViewSet(
     }
 
     def get_permissions(self):
+
         return [
             permission()
             for permission in self.permission_action_classes.get(

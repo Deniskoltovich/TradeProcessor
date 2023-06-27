@@ -12,6 +12,15 @@ from config import settings
 class AuthService:
     @staticmethod
     def refresh(request):
+
+        """
+        The refresh function is used to refresh the access token.
+        The function first retrieves the refresh token from the cookie,
+        then decodes it using jwt.decode().
+
+        :param request: Get the username from the request object
+        :return: The access token
+        """
         refresh_token = request.COOKIES.get(
             'refreshtoken'
         )  # Retrieve refresh token from the cookie
@@ -35,6 +44,16 @@ class AuthService:
 
     @staticmethod
     def login(request):
+        """
+        The login function is used to authenticate a user.
+        It takes in the username and password of the user, and returns
+            an access token if successful.
+
+        :param request: Get the username and password from the
+            request body
+        :return: A dictionary containing the access token and
+            refresh token
+        """
         username = request.data.get('username')
         password = request.data.get('password')
         if (username is None) or (password is None):

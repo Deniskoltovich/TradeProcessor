@@ -9,9 +9,7 @@ class JWTMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        """
-        Method used to check authentication for a user by JWT
-        """
+
         # Skip JWT verification for specific paths
         if (
             request.path_info

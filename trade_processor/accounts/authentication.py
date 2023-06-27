@@ -7,6 +7,19 @@ from rest_framework.authentication import BaseAuthentication
 
 class JWTAuthentication(BaseAuthentication):
     def authenticate(self, request):
+
+        """
+        The authenticate function is called on every request,
+            if the endpoint requires authentication.
+        The purpose of the function is to authenticate the user for
+            each request. If authentication succeeds, a two-tuple of
+        (user, token) is returned. If not, None is returned.
+
+        :param self: Refer to the class itself
+        :param request: Get the authorization header from the request
+        :return: A tuple of (user, token)
+        """
+
         User = get_user_model()
 
         if request.path.endswith('/login/'):

@@ -1,5 +1,6 @@
-from accounts.models import Portfolio, User
 from rest_framework import permissions
+
+from accounts.models import Portfolio, User
 
 
 class IsAdministrator(permissions.BasePermission):
@@ -20,7 +21,7 @@ class IsOwner(permissions.BasePermission):
         ):
             if type(obj) == User:
                 return request.user == obj
-            elif type(obj) == Portfolio:
+            elif type(obj) in (Portfolio,):
                 return obj.user == request.user
             return obj.portfolio.user == request.user
         return False

@@ -5,6 +5,15 @@ from django.conf import settings
 
 
 def generate_access_token(user):
+    """
+    The generate_access_token function takes in a user object and
+     returns an access token.
+    The expiry time of this token is set to 20 minutes.
+
+    :param user: Get the username of the user that is currently
+        logged in
+    :return: A jwt that contains the username of the user
+    """
 
     access_token_payload = {
         'username': user.username,
@@ -19,7 +28,15 @@ def generate_access_token(user):
 
 
 def generate_refresh_token(user):
+    """
+    The generate_refresh_token function generates a refresh token for
+     the user.
+    The function takes in a user object and returns the refresh token.
 
+
+    :param user: Get the username of the user
+    :return: A refresh token
+    """
     refresh_token_payload = {
         'username': user.username,
         'exp': datetime.datetime.utcnow() + datetime.timedelta(days=7),
