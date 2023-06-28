@@ -1,7 +1,5 @@
 from django.contrib.auth.base_user import BaseUserManager
 
-from accounts.models import User
-
 # mypy: ignore-errors
 
 
@@ -25,7 +23,7 @@ class UserManager(BaseUserManager):
         user = self.create_user(email, password, **kwargs)
         user.is_superuser = True
         user.is_staff = True
-        user.role = User.Role.ADMIN
+        user.role = user.Role.ADMIN
         user.save()
 
         return user
