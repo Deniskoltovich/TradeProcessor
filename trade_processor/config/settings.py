@@ -49,6 +49,7 @@ DJANDO_APPS = [
     "accounts",
     "orders",
     "assets",
+    'recommendations',
 ]
 
 INSTALLED_APPS = CORE_APPS + THIRD_PARTY_APPS + DJANDO_APPS

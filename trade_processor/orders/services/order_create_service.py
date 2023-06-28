@@ -1,9 +1,13 @@
 import django.db
+from django.db import transaction
+
 from accounts.models import Portfolio, PortfolioAsset
 from assets.models import Asset
-from django.db import transaction
 from orders.models import Order
 from orders.serializers import CreateOrderSerializer
+from recommendations.services.create_recommendation_service import (
+    CreateRecommendationService,
+)
 
 
 class OrderCreateService:
@@ -41,6 +45,7 @@ class OrderCreateService:
         )
         user.save()
         serializer.save()
+        CreateRecommendationService().execute(asset=asset, user=user)
         return serializer.data
 
     @staticmethod

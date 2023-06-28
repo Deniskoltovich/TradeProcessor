@@ -12,4 +12,5 @@ class Recommendation(models.Model):
     relevance_value = models.DecimalField(max_digits=5, decimal_places=4)
 
     class Meta:
-        ordering = ["relevance_value"]
+        get_latest_by = "relevance_value"
+        unique_together = ['user', 'asset']

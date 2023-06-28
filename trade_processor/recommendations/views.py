@@ -8,6 +8,9 @@ from assets.models import Asset
 from assets.serializers import AssetSerializer
 from recommendations.models import Recommendation
 from recommendations.serializers import ListRecommendationSerializer
+from recommendations.services.get_recommendations_service import (
+    GetRecommendationService,
+)
 
 
 class RecommendationViewSet(
@@ -30,6 +33,9 @@ class RecommendationViewSet(
                 self.action, (IsUser,)
             )
         ]
+
+    def list(self, request, *args, **kwargs):
+        return Response(GetRecommendationService().execute(request.user))
 
     def get_queryset(self):
         return self.queryset.filter(user=self.request.user)
