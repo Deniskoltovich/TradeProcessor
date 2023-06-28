@@ -1,12 +1,12 @@
 from django.contrib.auth import logout
 
-from accounts import serializers
+from accounts.serializers.user_serializers import PasswordUserSerializer
 
 
-class UpdateUserService:
+class UpdateUserPasswordService:
     @staticmethod
     def execute(user, request):
-        serializer = serializers.PasswordUserSerializer(data=request.data)
+        serializer = PasswordUserSerializer(data=request.data)
         if serializer.is_valid():
             user.set_password(serializer.validated_data['password'])
             user.save()

@@ -1,7 +1,9 @@
 from rest_framework import serializers
 
 from accounts.models import Portfolio, PortfolioAsset
-from accounts.serializers import PortfolioSerializer
+from accounts.serializers.portfolio_serializers import (
+    PortfolioSerializer,
+)
 from assets.models import Asset
 from assets.serializers import AssetSerializer
 from orders.models import AutoOrder, Order

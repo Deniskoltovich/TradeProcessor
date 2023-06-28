@@ -39,13 +39,10 @@ class CreateUserSerializer(serializers.ModelSerializer):
         ]
 
 
-class PartialUpdateUserSerializer(serializers.ModelSerializer):
+class UpdateUserByAdminSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = [
-            "balance",
-            'status',
-        ]
+        fields = ["balance", 'status', 'role']
 
 
 class PasswordUserSerializer(serializers.ModelSerializer):

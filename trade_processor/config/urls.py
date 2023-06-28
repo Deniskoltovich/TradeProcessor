@@ -44,7 +44,6 @@ urlpatterns = [
     path("accounts/", include("accounts.urls")),
     path("assets/", include('assets.urls')),
     path('orders/', include('orders.urls')),
-    path('recommendations/', include('recommendations.urls')),
     path("api/doc/", schema_view.with_ui("swagger", cache_timeout=0)),
     path("admin/", admin.site.urls),
 ]

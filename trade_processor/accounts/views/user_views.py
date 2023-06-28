@@ -18,9 +18,12 @@ from accounts.services import (
     list_transaction_service,
     subscription_service,
 )
+from accounts.services.user_services import create_user_service
 from accounts.services.user_services import (
-    create_user_service,
-    update_user_service,
+    update_user_by_admin_service as admin_update,
+)
+from accounts.services.user_services import (
+    update_user_password_service as password_update,
 )
 from mixins.get_serializer_class_mixin import GetSerializerClassMixin
 
@@ -39,15 +42,13 @@ class UserViewSet(
     serializer_class = user_serializers.ListUserSerializer
 
     serializer_action_classes = {
-        "partial_update": user_serializers.PartialUpdateUserSerializer,
-        'update': user_serializers.PartialUpdateUserSerializer,
+        'update': user_serializers.UpdateUserByAdminSerializer,
         'create': user_serializers.CreateUserSerializer,
     }
     permission_action_classes = {
         'list': (IsAdministrator,),
         'retrieve': (IsAdministrator | IsOwner,),
-        'update': (IsOwner | IsAdministrator,),
-        'partial_update': (IsOwner | IsAdministrator,),
+        'update': (IsAdministrator | IsOwner,),
         'create': (AllowAny,),
         'login': (AllowAny,),
         'refresh_token': (AllowAny,),
@@ -66,13 +67,33 @@ class UserViewSet(
         ]
 
     def update(self, request, *args, **kwargs):
-        if request.user.Role.ADMIN:
-            return super().update(request, *args, **kwargs)
+
+        """
+        The update function is used to update a user's information.
+        If a user is not an admin, they can only edit their own profile
+        The update method from user is used to change password.
+        If request.user is superuser, he can change user balance,
+         status and role
+
+        :param self: Represent the instance of the class
+        :param request: Get the data from the request
+        :param *args: Pass a non-keyworded, variable-length argument
+            list to the function
+        :param **kwargs: Pass keyworded, variable-length argument list
+            to a function
+        :return: A response object
+        """
+        if request.user.role == User.Role.ADMIN:
+            return Response(
+                admin_update.UpdateUserByAdminService().execute(
+                    request.data, kwargs['pk']
+                )
+            )
         else:
             user = self.get_object()
             return Response(
-                update_user_service.UpdateUserService().execute(
-                    user, request.data
+                password_update.UpdateUserPasswordService().execute(
+                    user, request
                 )
             )
 
@@ -90,8 +111,8 @@ class UserViewSet(
     def list_transactions(self, request, pk):
 
         """
-        The list_transactions function is used to list all transactions
-         for a given account.
+        The list_transactions function is used to list all
+         transactions for a given account.
         It takes in the request and pk (primary key) of the account,
          and returns a response containing
         all transactions associated with that account.
