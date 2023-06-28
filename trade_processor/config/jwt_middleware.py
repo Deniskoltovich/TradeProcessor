@@ -14,9 +14,6 @@ class JWTMiddleware:
         if (
             request.path_info
             in [
-                '/accounts/users/',
-                '/accounts/users/login/',
-                '/accounts/users/refresh_token/',
                 '/api/doc/',
                 reverse('admin:index'),
                 reverse('admin:login'),

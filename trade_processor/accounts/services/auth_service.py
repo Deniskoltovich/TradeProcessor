@@ -98,21 +98,13 @@ class AuthService:
         if request.path.endswith('/login/'):
             return None
 
-        authorization_header = request.headers.get('Authorization')
-        if not authorization_header:
-            return None
         try:
-            # header = 'Token xxxxxxxxxxxxxxxxxxxxxxxx'
-            access_token = authorization_header.split(' ')[1]
-            payload = jwt.decode(
-                access_token, settings.SECRET_KEY, algorithms=['HS256']
-            )
-
-        except jwt.ExpiredSignatureError:
-            raise exceptions.AuthenticationFailed('access_token expired')
-        except IndexError:
-            raise exceptions.AuthenticationFailed('Token prefix missing')
-        user = User.objects.filter(username=payload['username']).first()
+            user = User.objects.filter(
+                username=request.jwt_payload.get('username')
+            ).first()
+        except AttributeError:
+            print('here')
+            return None
         if user is None:
             raise exceptions.AuthenticationFailed('User not found')
 
