@@ -4,17 +4,6 @@ from assets.serializers import AssetSerializer
 
 class SubscriptionService:
     @staticmethod
-    def list(user):
-        """
-        The list function returns a list of all the assets that the
-         user is subscribed to.
-
-        :param user: Get the user's subscriptions
-        :return: The list of assets that the user is subscribed to
-        """
-        return AssetSerializer(user.subscriptions, many=True).data
-
-    @staticmethod
     def add(user, subscription_id):
 
         """
@@ -28,7 +17,7 @@ class SubscriptionService:
         asset = Asset.objects.get(id=subscription_id)
         user.subscriptions.add(asset)
         user.save()
-        return SubscriptionService.list(user)
+        return AssetSerializer(user.subscriptions, many=True).data
 
     @staticmethod
     def delete(user, subscription_id):
@@ -44,4 +33,4 @@ class SubscriptionService:
         asset = Asset.objects.get(id=subscription_id)
         user.subscriptions.remove(asset)
         user.save()
-        return SubscriptionService.list(user)
+        return AssetSerializer(user.subscriptions, many=True).data

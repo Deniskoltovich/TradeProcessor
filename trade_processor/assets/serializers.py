@@ -1,8 +1,16 @@
-from assets.models import Asset
 from rest_framework import serializers
+
+from assets.models import Asset
 
 
 class AssetSerializer(serializers.ModelSerializer):
     class Meta:
         model = Asset
-        fields = "__all__"
+        fields = (
+            'id',
+            'name',
+            'logo_url',
+            'description',
+            'type',
+            'current_price',
+        )

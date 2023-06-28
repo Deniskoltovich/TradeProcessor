@@ -1,8 +1,7 @@
 from rest_framework import serializers
 
-from accounts.models import Portfolio, PortfolioAsset
 from accounts.serializers.portfolio_serializers import (
-    PortfolioSerializer,
+    ListPortfolioSerializer,
 )
 from assets.models import Asset
 from assets.serializers import AssetSerializer
@@ -12,7 +11,7 @@ from orders.models import AutoOrder, Order
 
 
 class ListRetrieveOrderSerializer(serializers.ModelSerializer):
-    portfolio = PortfolioSerializer(many=False, read_only=True)
+    portfolio = ListPortfolioSerializer(many=False, read_only=True)
     asset = AssetSerializer(many=False, read_only=True)
 
     class Meta:
@@ -43,7 +42,7 @@ class CreateOrderSerializer(serializers.ModelSerializer):
 
 
 class ListAutoOrderSerializer(serializers.ModelSerializer):
-    portfolio = PortfolioSerializer(many=False, read_only=True)
+    portfolio = ListPortfolioSerializer(many=False, read_only=True)
     asset = AssetSerializer(many=False, read_only=True)
 
     class Meta:

@@ -3,7 +3,7 @@ from orders import serializers
 from orders.models import AutoOrder, Order
 
 
-class ListTransactions:
+class ListTransactionsService:
     @staticmethod
     def execute(user_id):
         """
@@ -22,10 +22,5 @@ class ListTransactions:
         auto_order_transactions = AutoOrder.objects.filter(
             portfolio__user=user, status=AutoOrder.Status.FINISHED
         )
-        orders_data = serializers.ListRetrieveOrderSerializer(
-            order_transactions, many=True
-        ).data
-        auto_orders_data = serializers.ListAutoOrderSerializer(
-            auto_order_transactions, many=True
-        ).data
-        return {'orders': orders_data, 'auto_orders': auto_orders_data}
+
+        return (order_transactions, auto_order_transactions)

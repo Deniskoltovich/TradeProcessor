@@ -6,7 +6,7 @@ from config import settings
 
 class CreateUserService:
     @staticmethod
-    def execute(request):
+    def create(request):
         username = request.data.get('username')
         password = request.data.pop('password')
         email = request.data.pop('email')

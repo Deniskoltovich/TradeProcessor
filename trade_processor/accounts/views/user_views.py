@@ -18,14 +18,14 @@ from accounts.services import (
     list_transaction_service,
     subscription_service,
 )
-from accounts.services.user_services import create_user_service
-from accounts.services.user_services import (
-    update_user_by_admin_service as admin_update,
+from accounts.services.user.change_password import (
+    UpdateUserPasswordService,
 )
-from accounts.services.user_services import (
-    update_user_password_service as password_update,
-)
+from accounts.services.user.create_user import CreateUserService
+from accounts.services.user.update_user import UpdateUserService
+from assets.serializers import AssetSerializer
 from mixins.get_serializer_class_mixin import GetSerializerClassMixin
+from orders import serializers
 
 
 class UserViewSet(
@@ -85,21 +85,15 @@ class UserViewSet(
         """
         if request.user.role == User.Role.ADMIN:
             return Response(
-                admin_update.UpdateUserByAdminService().execute(
-                    request.data, kwargs['pk']
-                )
+                UpdateUserService.update(request.data, kwargs['pk'])
             )
         else:
             user = self.get_object()
-            return Response(
-                password_update.UpdateUserPasswordService().execute(
-                    user, request
-                )
-            )
+            return Response(UpdateUserPasswordService.update(user, request))
 
     def create(self, request, *args, **kwargs):
         return Response(
-            create_user_service.CreateUserService().execute(request),
+            CreateUserService.create(request),
             status=201,
         )
 
@@ -122,18 +116,29 @@ class UserViewSet(
         :param pk: Retrieve the transactions of a specific account
         :return: A list of transactions' data
         """
+        (
+            order_transactions,
+            auto_order_transactions,
+        ) = list_transaction_service.ListTransactionsService.execute(pk)
+
+        orders_data = serializers.ListRetrieveOrderSerializer(
+            order_transactions, many=True
+        ).data
+        auto_orders_data = serializers.ListAutoOrderSerializer(
+            auto_order_transactions, many=True
+        ).data
         return Response(
-            list_transaction_service.ListTransactions().execute(pk)
+            {'orders': orders_data, 'auto_orders': auto_orders_data}
         )
 
     @action(
         detail=False,
         methods=['get'],
-        url_path='refresh_token',
+        url_path='refresh',
     )
     def refresh_token(self, request):
         try:
-            return Response(auth_service.AuthService().refresh(request))
+            return Response(auth_service.AuthService.refresh(request))
         except jwt.ExpiredSignatureError:
             return Response({'error': 'Refresh token expired'}, status=401)
         except jwt.DecodeError:
@@ -147,17 +152,15 @@ class UserViewSet(
         detail=False,
         methods=['post'],
         url_path='login',
-        permission_classes=[AllowAny],
     )
     def login(self, request):
 
-        data = auth_service.AuthService().login(request)
+        data = auth_service.AuthService.login(request)
         response = Response()
-        response.set_cookie(
-            key='refreshtoken', value=data.get('refresh_token'), httponly=True
-        )
+
         response.data = {
             'access_token': data.get('access_token'),
+            'refreshtoken': data.get('refresh_token'),
             'user': data.get('serialized_user'),
         }
         return response
@@ -165,7 +168,7 @@ class UserViewSet(
     @action(
         detail=True,
         methods=['post'],
-        url_path='subscriptions/add',
+        url_path='subscriptions',
     )
     def add_subscription(self, request, pk):
 
@@ -198,13 +201,13 @@ class UserViewSet(
         :return: A list of all the subscriptions for a user
         """
         return Response(
-            subscription_service.SubscriptionService().list(request.user)
+            AssetSerializer(request.user.subscriptions, many=True).data
         )
 
     @action(
         detail=True,
         methods=['DELETE'],
-        url_path='subscriptions/delete',
+        url_path='subscriptions',
     )
     def delete_subscription(self, request, pk):
 

@@ -9,8 +9,7 @@ from orders.serializers import CreateOrderSerializer
 
 class OrderCreateService:
     @staticmethod
-    @transaction.atomic()
-    def execute(user, data):
+    def create(user, data):
 
         """
         The execute function is the main function of this service.
@@ -36,31 +35,29 @@ class OrderCreateService:
 
         asset = Asset.objects.get(id=data.get('asset'))
         data['price'] = asset.current_price
+        return data
 
-        serializer = CreateOrderSerializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        asset = serializer.validated_data.get('asset')
-        OrderCreateService.check_conditions(
-            serializer.validated_data, portfolio, asset
-        )
+    @staticmethod
+    def process_transaction(validated_data):
+        portfolio = validated_data['portfolio']
+        asset = validated_data.get('asset')
+        OrderCreateService.check_conditions(validated_data, portfolio, asset)
 
         try:
             portfolio_asset = PortfolioAsset.objects.get(
                 asset=asset, portfolio=portfolio
             )
-            portfolio_asset.quantity += serializer.validated_data['quantity']
+            portfolio_asset.quantity += validated_data['quantity']
         except PortfolioAsset.DoesNotExist:
             PortfolioAsset.objects.create(
                 asset=asset,
                 portfolio=portfolio,
-                quantity=serializer.validated_data['quantity'],
+                quantity=validated_data['quantity'],
             )
-        user.balance -= (
-            asset.current_price * serializer.validated_data['quantity']
+        portfolio.user.balance -= (
+            asset.current_price * validated_data['quantity']
         )
-        user.save()
-        serializer.save()
-        return serializer.data
+        portfolio.user.save()
 
     @staticmethod
     def check_conditions(validated_data, portfolio, asset):

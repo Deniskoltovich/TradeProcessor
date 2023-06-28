@@ -13,7 +13,7 @@ class ListUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = [
+        fields = (
             "id",
             'username',
             "email",
@@ -23,29 +23,40 @@ class ListUserSerializer(serializers.ModelSerializer):
             "portfolios_id",
             "created_at",
             "updated_at",
-        ]
+        )
 
 
 class CreateUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = [
+        fields = (
             'username',
             "email",
             "avatar_url",
             'password',
             "created_at",
             "updated_at",
-        ]
+        )
 
 
 class UpdateUserByAdminSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["balance", 'status', 'role']
+        fields = ("balance", 'status', 'role')
 
 
 class PasswordUserSerializer(serializers.ModelSerializer):
+    password2 = serializers.CharField(write_only=True)
+
     class Meta:
         model = User
-        fields = ['password']
+        fields = ('password', 'password2')
+
+    def validate(self, attrs):
+        password = attrs.get('password')
+        password2 = attrs.get('password2')
+
+        if password and password2 and password != password2:
+            raise serializers.ValidationError("Passwords do not match.")
+
+        return attrs

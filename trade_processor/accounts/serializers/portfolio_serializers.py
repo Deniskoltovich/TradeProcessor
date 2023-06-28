@@ -5,14 +5,14 @@ from accounts.models import Portfolio
 # mypy: ignore-errors
 
 
-class PortfolioSerializer(serializers.ModelSerializer):
+class ListPortfolioSerializer(serializers.ModelSerializer):
     assets = serializers.SlugRelatedField(
         many=True, read_only=True, slug_field="name"
     )
 
     class Meta:
         model = Portfolio
-        fields = [
+        fields = (
             'id',
             'user',
             "name",
@@ -20,4 +20,23 @@ class PortfolioSerializer(serializers.ModelSerializer):
             "assets",
             "created_at",
             "updated_at",
-        ]
+        )
+
+
+class CreatePortfolioSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Portfolio
+        fields = (
+            'user',
+            "name",
+            "description",
+        )
+
+
+class UpdatePortfolioSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Portfolio
+        fields = (
+            "name",
+            "description",
+        )

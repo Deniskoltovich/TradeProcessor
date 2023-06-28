@@ -5,15 +5,15 @@ FROM python:3.10.6
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-WORKDIR ./code
+WORKDIR /code
 
 # Install dependencies
 RUN apt-get update && apt-get install -y git
 RUN pip install pipenv
 COPY Pipfile .
 COPY Pipfile.lock .
-COPY entrypoint.sh .
-RUN chmod +x entrypoint.sh
+COPY entrypoint_web.sh .
+RUN chmod +x entrypoint_web.sh
 RUN pipenv install --system
 COPY . /code
 
@@ -22,4 +22,3 @@ COPY .pre-commit-config.yaml .
 # Set up pre-commit hooks
 RUN git init && pipenv run pre-commit install
 
-ENTRYPOINT ["./entrypoint.sh"]

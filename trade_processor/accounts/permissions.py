@@ -8,7 +8,7 @@ class IsAdministrator(permissions.BasePermission):
         return (
             request.user
             and request.user.is_authenticated
-            and request.user.role == request.user.Role.ADMIN
+            and request.user.role == User.Role.ADMIN
         )
 
 
@@ -17,11 +17,11 @@ class IsOwner(permissions.BasePermission):
         if (
             request.user
             and request.user.is_authenticated
-            and request.user.role == request.user.Role.USER
+            and request.user.role == User.Role.USER
         ):
-            if type(obj) == User:
+            if isinstance(obj, User):
                 return request.user == obj
-            elif type(obj) in (Portfolio,):
+            elif isinstance(obj, Portfolio):
                 return obj.user == request.user
             return obj.portfolio.user == request.user
         return False
@@ -32,7 +32,7 @@ class IsAnalyst(permissions.BasePermission):
         return (
             request.user
             and request.user.is_authenticated
-            and request.user.role == request.user.Role.ANALYST
+            and request.user.role == User.Role.ANALYST
         )
 
 
@@ -41,5 +41,5 @@ class IsUser(permissions.BasePermission):
         return (
             request.user
             and request.user.is_authenticated
-            and request.user.role == request.user.Role.USER
+            and request.user.role == User.Role.USER
         )

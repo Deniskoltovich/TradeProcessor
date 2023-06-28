@@ -4,12 +4,12 @@ from accounts.serializers.user_serializers import (
 )
 
 
-class UpdateUserByAdminService:
+class UpdateUserService:
     @staticmethod
-    def execute(data, pk):
+    def update(data, pk):
 
         """
-        The execute function updates the user's status, balance or role
+        The update function updates the user's status, balance or role
             Args:
                 data (dict): The request body containing the new values
                  for status, balance and role.
