@@ -103,7 +103,6 @@ class AuthService:
                 username=request.jwt_payload.get('username')
             ).first()
         except AttributeError:
-            print('here')
             return None
         if user is None:
             raise exceptions.AuthenticationFailed('User not found')
