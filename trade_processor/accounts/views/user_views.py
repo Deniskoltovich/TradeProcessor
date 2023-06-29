@@ -13,6 +13,9 @@ from accounts.permissions import (
     IsUser,
 )
 from accounts.serializers import user_serializers
+from accounts.serializers.user_serializers import (
+    UpdateUserByAdminSerializer,
+)
 from accounts.services import (
     auth_service,
     list_transaction_service,
@@ -84,9 +87,13 @@ class UserViewSet(
         :return: A response object
         """
         if request.user.role == User.Role.ADMIN:
-            return Response(
-                UpdateUserService.update(request.data, kwargs['pk'])
-            )
+            data = UpdateUserService.update(request.data, kwargs['pk'])
+            serializer = UpdateUserByAdminSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors)
+
         else:
             user = self.get_object()
             return Response(UpdateUserPasswordService.update(user, request))

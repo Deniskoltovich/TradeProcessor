@@ -18,6 +18,7 @@ class RecommendationViewSet(
     generics.mixins.RetrieveModelMixin,
     generics.mixins.ListModelMixin,
 ):
+    queryset = Recommendation.objects.all()
     serializer_class = ListRecommendationSerializer
 
     permission_action_classes = {
