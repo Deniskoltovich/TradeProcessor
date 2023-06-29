@@ -9,6 +9,7 @@ class JWTMiddleware(MiddlewareMixin):
         request.user = SimpleLazyObject(
             lambda: self.__class__.get_user(request)
         )
+        setattr(request, '_dont_enforce_csrf_checks', True)
 
     @staticmethod
     def get_user(request):
