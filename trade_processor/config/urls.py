@@ -43,6 +43,7 @@ schema_view = get_schema_view(
 urlpatterns = [
     path("accounts/", include("accounts.urls")),
     path("assets/", include('assets.urls')),
+    path('recommendations/', include('recommendations.urls')),
     path('orders/', include('orders.urls')),
     path("api/doc/", schema_view.with_ui("swagger", cache_timeout=0)),
     path("admin/", admin.site.urls),

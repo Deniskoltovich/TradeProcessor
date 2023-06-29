@@ -5,6 +5,9 @@ from accounts.models import Portfolio, PortfolioAsset
 from assets.models import Asset
 from orders.models import Order
 from orders.serializers import CreateOrderSerializer
+from recommendations.services.create_recommendation_service import (
+    CreateRecommendationService,
+)
 
 
 class OrderCreateService:
@@ -58,6 +61,7 @@ class OrderCreateService:
             asset.current_price * validated_data['quantity']
         )
         portfolio.user.save()
+        CreateRecommendationService().execute(asset=asset, user=portfolio.user)
 
     @staticmethod
     def check_conditions(validated_data, portfolio, asset):
