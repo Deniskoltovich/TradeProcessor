@@ -27,10 +27,9 @@ class CreateRecommendationService:
         :param user: Get the user's recommendations and assets
         :return: A serialized recommendation object
         """
-        try:
-            Recommendation.objects.get(user=user, asset=asset).delete()
-        except Recommendation.DoesNotExist:
-            pass
+        recommendation = Recommendation.objects.filter(user=user, asset=asset)
+        if recommendation.exists():
+            recommendation.delete()
 
         user_recommendations = Recommendation.objects.filter(user=user)
         if user_recommendations.count() == 5:
@@ -40,6 +39,8 @@ class CreateRecommendationService:
         recommendation = CreateRecommendationService.create_new_recommendation(
             user, user_assets
         )
+        if not recommendation:
+            return {'message': 'No asset to recommend'}
         serializer = CreateRecommendationSerializer(instance=recommendation)
         return serializer.data
 
@@ -87,7 +88,10 @@ class CreateRecommendationService:
             .order_by('difference')
             .first()
         )
-        relevance_value = asset_with_min_difference.difference / avg_price
+        try:
+            relevance_value = asset_with_min_difference.difference / avg_price
+        except AttributeError:
+            return None
         recommendation = Recommendation.objects.create(
             user=user,
             asset=asset_with_min_difference,

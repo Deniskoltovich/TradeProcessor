@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 
 import jwt
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AnonymousUser
 from rest_framework import exceptions
 
 from accounts.models import User
@@ -28,19 +29,9 @@ class AuthService:
         if not refresh_token:
             raise exceptions.AuthenticationFailed()
 
-        decoded_token = jwt.decode(
-            refresh_token, settings.SECRET_KEY, algorithms=['HS256']
-        )
-        username = decoded_token.get('username')
+        username = AuthService.get_username_from_token(refresh_token)
 
-        expiration_time = datetime.utcnow() + timedelta(days=0, minutes=20)
-        access_token = jwt.encode(
-            {'username': username, 'exp': expiration_time},
-            settings.SECRET_KEY,
-            algorithm='HS256',
-        )
-
-        return {'access_token': access_token}
+        return {'access_token': AuthService.generate_access_token(username)}
 
     @staticmethod
     def login(request):
@@ -56,7 +47,7 @@ class AuthService:
         """
         username = request.data.get('username')
         password = request.data.get('password')
-        if (username is None) or (password is None):
+        if not username or not password:
             raise exceptions.AuthenticationFailed(
                 'username and password required'
             )
@@ -79,38 +70,20 @@ class AuthService:
         return data
 
     @staticmethod
-    def authenticate(request):
+    def authenticate_user(headers: dict):
+        user = AnonymousUser()
+        auth_header = headers.get('Authorization', '').split()
+        if len(auth_header) == 2 and auth_header[0].lower() == 'bearer':
+            try:
+                username = AuthService.get_username_from_token(auth_header[1])
+            except jwt.ExpiredSignatureError:
+                raise exceptions.AuthenticationFailed('Token expired')
+            except (jwt.DecodeError, User.DoesNotExist):
+                raise exceptions.AuthenticationFailed('Invalid token')
 
-        """
-        The authenticate function is called on every request,
-        if the endpoint requires authentication.
-        The purpose of the function is to authenticate the user for
-        each request. If authentication succeeds, a two-tuple of
-        (user, token) is returned. If not, None is returned.
+            user = User.objects.get(username=username)
 
-        :param self: Refer to the class itself
-        :param request: Get the authorization header from the request
-        :return: A tuple of (user, token)
-        """
-
-        User = get_user_model()
-
-        if request.path.endswith('/login/'):
-            return None
-
-        try:
-            user = User.objects.filter(
-                username=request.jwt_payload.get('username')
-            ).first()
-        except AttributeError:
-            return None
-        if user is None:
-            raise exceptions.AuthenticationFailed('User not found')
-
-        if not user.is_active:
-            raise exceptions.AuthenticationFailed('user is inactive')
-
-        return (user, None)
+        return user
 
     @staticmethod
     def generate_access_token(user):
@@ -123,16 +96,9 @@ class AuthService:
             logged in
         :return: A jwt that contains the username of the user
         """
-
-        access_token_payload = {
-            'username': user.username,
-            'exp': datetime.utcnow() + timedelta(days=0, minutes=20),
-            'iat': datetime.utcnow(),
-        }
-        access_token = jwt.encode(
-            access_token_payload, settings.SECRET_KEY, algorithm='HS256'
+        return AuthService.encode_token(
+            user.username, timedelta(days=0, minutes=20)
         )
-        return access_token
 
     @staticmethod
     def generate_refresh_token(user):
@@ -146,12 +112,39 @@ class AuthService:
         :param user: Get the username of the user
         :return: A refresh token
         """
-        refresh_token_payload = {
-            'username': user.username,
-            'exp': datetime.utcnow() + timedelta(days=7),
+
+        return AuthService.encode_token(user.username, timedelta(days=7))
+
+    @staticmethod
+    def encode_token(username: str, time_delta: timedelta):
+
+        """
+        The encode_token function takes in a username and a timedelta
+        object.
+        It then creates a token payload dictionary with the username,
+         an expiration time, and an issued at time. It then encodes
+          this payload into JSON Web Token format using the HS256
+           algorithm and returns it.
+
+        :param username: str: Pass in the username of the user who is
+            logging in
+        :param time_delta: timedelta: Set the expiration time of the
+            token
+        :return: A token
+        """
+        token_payload = {
+            'username': username,
+            'exp': datetime.utcnow() + time_delta,
             'iat': datetime.utcnow(),
         }
-        refresh_token = jwt.encode(
-            refresh_token_payload, settings.SECRET_KEY, algorithm='HS256'
+        token = jwt.encode(
+            token_payload, settings.SECRET_KEY, algorithm='HS256'
         )
-        return refresh_token
+        return token
+
+    @staticmethod
+    def get_username_from_token(token: str):
+        decoded_token = jwt.decode(
+            token, settings.SECRET_KEY, algorithms=['HS256']
+        )
+        return decoded_token.get('username')

@@ -50,7 +50,7 @@ class PortfolioViewSet(
             )
         ]
 
-    @action(detail=False, methods=['get'], url_path='my')
+    @action(detail=False, methods=('get',), url_path='my')  # type: ignore
     def my_portfolios(self, request):
 
         """

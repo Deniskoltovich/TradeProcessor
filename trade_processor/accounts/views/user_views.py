@@ -4,7 +4,6 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from accounts.authentication import JWTAuthentication
 from accounts.models import User
 from accounts.permissions import (
     IsAdministrator,
@@ -39,7 +38,6 @@ class UserViewSet(
     generics.mixins.CreateModelMixin,
     GetSerializerClassMixin,
 ):
-    authentication_classes = [JWTAuthentication]
 
     queryset = User.objects.all()
     serializer_class = user_serializers.ListUserSerializer
@@ -106,7 +104,7 @@ class UserViewSet(
 
     @action(
         detail=True,
-        methods=['get'],
+        methods=('get',),  # type: ignore
         url_path='transactions',
     )
     def list_transactions(self, request, pk):
@@ -140,7 +138,7 @@ class UserViewSet(
 
     @action(
         detail=False,
-        methods=['get'],
+        methods=('get',),  # type: ignore
         url_path='refresh',
     )
     def refresh_token(self, request):
@@ -157,7 +155,7 @@ class UserViewSet(
 
     @action(
         detail=False,
-        methods=['post'],
+        methods=('post',),  # type: ignore
         url_path='login',
     )
     def login(self, request):
@@ -173,10 +171,24 @@ class UserViewSet(
         return response
 
     @action(
-        detail=True,
-        methods=['post'],
-        url_path='subscriptions',
+        detail=True, methods=('get',), url_path='subscriptions'  # type: ignore
     )
+    def list_subscription(self, request, pk=None):
+
+        """
+        The list_subscription function is used to list all the
+         subscriptions of a user.
+
+        :param self: Represent the instance of the object itself
+        :param request: Get the user from the request object
+        :param pk: Get the primary key of the object
+        :return: A list of all the subscriptions for a user
+        """
+        return Response(
+            AssetSerializer(request.user.subscriptions, many=True).data
+        )
+
+    @list_subscription.mapping.post
     def add_subscription(self, request, pk):
 
         """
@@ -195,27 +207,7 @@ class UserViewSet(
             )
         )
 
-    @action(detail=True, methods=['get'], url_path='subscriptions')
-    def list_subscription(self, request, pk=None):
-
-        """
-        The list_subscription function is used to list all the
-         subscriptions of a user.
-
-        :param self: Represent the instance of the object itself
-        :param request: Get the user from the request object
-        :param pk: Get the primary key of the object
-        :return: A list of all the subscriptions for a user
-        """
-        return Response(
-            AssetSerializer(request.user.subscriptions, many=True).data
-        )
-
-    @action(
-        detail=True,
-        methods=['DELETE'],
-        url_path='subscriptions',
-    )
+    @list_subscription.mapping.delete
     def delete_subscription(self, request, pk):
 
         return Response(
