@@ -1,5 +1,9 @@
 from django.contrib.auth.base_user import BaseUserManager
 
+from accounts.tasks.send_confirmation_email import (
+    send_confirmation_email,
+)
+
 # mypy: ignore-errors
 
 
@@ -12,7 +16,7 @@ class UserManager(BaseUserManager):
         user = self.model(email=self.normalize_email(email), **kwargs)
         user.set_password(password)
         user.save()
-
+        send_confirmation_email.delay(user.id)
         return user
 
     def create_superuser(self, email, password, **kwargs):

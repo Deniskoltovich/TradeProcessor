@@ -41,7 +41,7 @@ schema_view = get_schema_view(
 
 
 urlpatterns = [
-    path("accounts/", include("accounts.urls")),
+    path("accounts/", include("accounts.urls", "accounts")),
     path("assets/", include('assets.urls')),
     path('recommendations/', include('recommendations.urls')),
     path('orders/', include('orders.urls')),
