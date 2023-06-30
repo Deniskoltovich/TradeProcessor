@@ -23,7 +23,8 @@ services:
     build:
       dockerfile: ./Dockerfile
     entrypoint: celery -A config worker -l info
-
+    volumes:
+      - .:/code
     env_file:
       - ./.env
     depends_on:

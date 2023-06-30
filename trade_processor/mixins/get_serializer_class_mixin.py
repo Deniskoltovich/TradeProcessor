@@ -11,12 +11,15 @@ class GetSerializerClassMixin(object):
           by get_serializer_class()
 
         """
-        serializer = self.serializer_role_action_classes.get(
-            (self.request.user.role, self.action)
-        )
+        try:
+            serializer = self.serializer_role_action_classes.get(
+                (self.request.user.role, self.action)
+            )
+            if serializer:
+                return serializer
+        except AttributeError:
+            pass
 
-        if serializer:
-            return serializer
         try:
             return self.serializer_action_classes[self.action]
         except (KeyError, AttributeError):
