@@ -13,7 +13,11 @@ RUN pip install pipenv
 COPY Pipfile .
 COPY Pipfile.lock .
 COPY entrypoint_web.sh .
+COPY entrypoint_celery.sh .
+
 RUN chmod +x entrypoint_web.sh
+RUN chmod +x entrypoint_celery.sh
+
 RUN pipenv install --system
 COPY . /code
 
