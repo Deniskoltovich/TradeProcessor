@@ -6,7 +6,6 @@ from django.contrib.auth.models import AnonymousUser
 from rest_framework import exceptions
 
 from accounts.models import User
-from accounts.serializers.user_serializers import ListUserSerializer
 from config import settings
 
 
@@ -58,16 +57,9 @@ class AuthService:
         if not user.check_password(password):
             raise exceptions.AuthenticationFailed('wrong password')
 
-        serialized_user = ListUserSerializer(user).data
-
         access_token = AuthService.generate_access_token(user)
         refresh_token = AuthService.generate_refresh_token(user)
-        data = {
-            'refresh_token': refresh_token,
-            'access_token': access_token,
-            'user': serialized_user,
-        }
-        return data
+        return access_token, refresh_token
 
     @staticmethod
     def authenticate_user(headers: dict):

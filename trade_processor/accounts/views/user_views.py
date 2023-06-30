@@ -31,21 +31,40 @@ from orders import serializers
 
 
 class UserViewSet(
+    GetSerializerClassMixin,
     viewsets.GenericViewSet,
     generics.mixins.RetrieveModelMixin,
     generics.mixins.ListModelMixin,
     generics.mixins.UpdateModelMixin,
     generics.mixins.CreateModelMixin,
-    GetSerializerClassMixin,
 ):
 
     queryset = User.objects.all()
-    serializer_class = user_serializers.ListUserSerializer
+
+    serializer_role_action_classes = {
+        (User.Role.ADMIN, 'list'): user_serializers.AdminViewUserSerializer,
+        (
+            User.Role.ADMIN,
+            'retrieve',
+        ): user_serializers.AdminViewUserSerializer,
+        (
+            User.Role.USER,
+            'retrieve',
+        ): user_serializers.UserViewUserSerializer,
+        (
+            User.Role.ADMIN,
+            'list_transactions',
+        ): serializers.AdminViewOrderSerializer,
+        (User.Role.USER, 'create'): serializers.UserViewOrderSerializer,
+    }
 
     serializer_action_classes = {
         'update': user_serializers.UpdateUserByAdminSerializer,
-        'create': user_serializers.CreateUserSerializer,
+        'retrieve': user_serializers.UserViewUserSerializer,
+        "list_transactions": serializers.UserViewOrderSerializer,
+        'create': serializers.AdminViewOrderSerializer,
     }
+
     permission_action_classes = {
         'list': (IsAdministrator,),
         'retrieve': (IsAdministrator | IsOwner,),
@@ -54,7 +73,7 @@ class UserViewSet(
         'login': (AllowAny,),
         'refresh_token': (AllowAny,),
         'add_subscription': (IsUser,),
-        'list_subscription': (IsUser,),
+        'list_subscription': (IsOwner,),
         'delete_subscription': (IsOwner,),
         'list_transactions': (IsAdministrator | IsOwner | IsAnalyst,),
     }
@@ -97,8 +116,10 @@ class UserViewSet(
             return Response(UpdateUserPasswordService.update(user, request))
 
     def create(self, request, *args, **kwargs):
+        user = CreateUserService.create(request)
+        serializer = self.get_serializer_class()(instance=user)
         return Response(
-            CreateUserService.create(request),
+            serializer.data,
             status=201,
         )
 
@@ -121,15 +142,16 @@ class UserViewSet(
         :param pk: Retrieve the transactions of a specific account
         :return: A list of transactions' data
         """
+
         (
             order_transactions,
             auto_order_transactions,
         ) = list_transaction_service.ListTransactionsService.execute(pk)
 
-        orders_data = serializers.ListRetrieveOrderSerializer(
+        orders_data = self.get_serializer_class()(
             order_transactions, many=True
         ).data
-        auto_orders_data = serializers.ListAutoOrderSerializer(
+        auto_orders_data = self.get_serializer_class()(
             auto_order_transactions, many=True
         ).data
         return Response(
@@ -159,16 +181,12 @@ class UserViewSet(
         url_path='login',
     )
     def login(self, request):
-
-        data = auth_service.AuthService.login(request)
-        response = Response()
-
-        response.data = {
-            'access_token': data.get('access_token'),
-            'refreshtoken': data.get('refresh_token'),
-            'user': data.get('serialized_user'),
+        access_token, refresh_token = auth_service.AuthService.login(request)
+        data = {
+            'refresh_token': refresh_token,
+            'access_token': access_token,
         }
-        return response
+        return Response(data)
 
     @action(
         detail=True, methods=('get',), url_path='subscriptions'  # type: ignore
@@ -201,17 +219,16 @@ class UserViewSet(
             subscribed to
         :return: A response object
         """
-        return Response(
-            subscription_service.SubscriptionService().add(
-                request.user, request.data.get('asset_id')
-            )
+        subs = subscription_service.SubscriptionService().add(
+            request.user, request.data.get('asset_id')
         )
+        serializer = AssetSerializer(subs, many=True)
+        return Response(serializer.data)
 
     @list_subscription.mapping.delete
     def delete_subscription(self, request, pk):
-
-        return Response(
-            subscription_service.SubscriptionService().delete(
-                request.user, request.data.get('asset_id')
-            )
+        subs = subscription_service.SubscriptionService().delete(
+            request.user, request.data.get('asset_id')
         )
+        serializer = AssetSerializer(subs, many=True)
+        return Response(serializer.data)

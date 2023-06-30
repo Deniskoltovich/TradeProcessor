@@ -4,6 +4,7 @@ from rest_framework import generics, viewsets
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
+from accounts.models import User
 from accounts.permissions import (
     IsAdministrator,
     IsAnalyst,
@@ -13,24 +14,33 @@ from accounts.permissions import (
 from mixins.get_serializer_class_mixin import GetSerializerClassMixin
 from orders import serializers
 from orders.models import Order
-from orders.serializers import CreateOrderSerializer
+from orders.serializers import UpdateCreateOrderSerializer
 from orders.services.create_order import OrderCreateService
 
 
 class OrderViewSet(
+    GetSerializerClassMixin,
     viewsets.GenericViewSet,
     generics.mixins.RetrieveModelMixin,
     generics.mixins.ListModelMixin,
     generics.mixins.UpdateModelMixin,
     generics.mixins.CreateModelMixin,
     generics.mixins.DestroyModelMixin,
-    GetSerializerClassMixin,
 ):
     queryset = Order.objects.all()
-    serializer_class = serializers.ListRetrieveOrderSerializer
-    serializer_action_classes = {
-        'create': serializers.CreateOrderSerializer,
+    serializer_class = serializers.UserViewOrderSerializer
+
+    serializer_role_action_classes = {
+        (User.Role.ADMIN, 'list'): serializers.AdminViewOrderSerializer,
+        (User.Role.ADMIN, 'retrieve'): serializers.AdminViewOrderSerializer,
     }
+
+    serializer_action_classes = {
+        'create': serializers.UpdateCreateOrderSerializer,
+        'update': serializers.UpdateCreateOrderSerializer,
+        'partial_update': serializers.UpdateCreateOrderSerializer,
+    }
+
     permission_action_classes = {
         'list': (IsAdministrator | IsAnalyst,),
         'retrieve': (IsAdministrator | IsAnalyst | IsOwner,),
@@ -38,7 +48,6 @@ class OrderViewSet(
         'partial_update': (IsAdministrator,),
         'destroy': (IsAdministrator,),
         'create': (IsUser | IsAdministrator,),
-        'list_transactions': (IsAdministrator, IsOwner, IsAnalyst),
     }
 
     def get_permissions(self):
@@ -54,7 +63,7 @@ class OrderViewSet(
 
         try:
             order_data = OrderCreateService.create(request.user, request.data)
-            serializer = CreateOrderSerializer(data=order_data)
+            serializer = UpdateCreateOrderSerializer(data=order_data)
             serializer.is_valid(raise_exception=True)
             serializer.save()
             OrderCreateService.process_transaction(serializer.validated_data)

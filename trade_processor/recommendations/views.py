@@ -1,11 +1,8 @@
 from rest_framework import generics, viewsets
-from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from accounts.permissions import IsAdministrator, IsOwner, IsUser
-from accounts.services import portfolio_service
-from assets.models import Asset
-from assets.serializers import AssetSerializer
+from accounts.permissions import IsOwner, IsUser
+from mixins.get_serializer_class_mixin import GetSerializerClassMixin
 from recommendations.models import Recommendation
 from recommendations.serializers import ListRecommendationSerializer
 from recommendations.services.get_recommendations_service import (

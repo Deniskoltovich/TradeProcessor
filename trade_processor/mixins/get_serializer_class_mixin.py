@@ -1,29 +1,23 @@
 class GetSerializerClassMixin(object):
     def get_serializer_class(self):
         """
-        A class which inhertis this mixins should have variable
-        `serializer_action_classes`.
-        Look for serializer class in self.serializer_action_classes,
-         which
-        should be a dict mapping action name (key) to serializer
-         class (value),
-        i.e.:
-        class SampleViewSet(viewsets.ViewSet):
-            serializer_class = DocumentSerializer
-            serializer_action_classes = {
-               'upload': UploadDocumentSerializer,
-               'download': DownloadDocumentSerializer,
-            }
-            @action
-            def upload:
-                ...
-        If there's no entry for that action then just
-         fallback
-         to the regular
-        get_serializer_class lookup: self.serializer_class,
-         DefaultSerializer.
+        Returns the serializer class based on the current action and
+         user's role.
+         It checks serializer_role_action_classes for serializers
+          dependent on role and action both. If there are no such
+          serializers, it checks serializer_action_classes for
+          serializers dependent only on action. If there are also no
+          such serializers, it returns default serializer
+          by get_serializer_class()
+
         """
+        serializer = self.serializer_role_action_classes.get(
+            (self.request.user.role, self.action)
+        )
+
+        if serializer:
+            return serializer
         try:
             return self.serializer_action_classes[self.action]
         except (KeyError, AttributeError):
-            return super().get_serializer_class()
+            return super(GetSerializerClassMixin, self).get_serializer_class()

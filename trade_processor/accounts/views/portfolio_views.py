@@ -2,30 +2,35 @@ from rest_framework import generics, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from accounts.models import Portfolio
+from accounts.models import Portfolio, User
 from accounts.permissions import IsAdministrator, IsOwner, IsUser
 from accounts.serializers import portfolio_serializers
 from accounts.serializers.portfolio_serializers import (
+    AdminViewPortfolioSerializer,
     CreatePortfolioSerializer,
-    ListPortfolioSerializer,
     UpdatePortfolioSerializer,
+    UserViewPortfolioSerializer,
 )
 from accounts.services.portfolio_service import PortfolioService
 from mixins.get_serializer_class_mixin import GetSerializerClassMixin
 
 
 class PortfolioViewSet(
+    GetSerializerClassMixin,
     viewsets.GenericViewSet,
     generics.mixins.RetrieveModelMixin,
     generics.mixins.ListModelMixin,
     generics.mixins.CreateModelMixin,
     generics.mixins.UpdateModelMixin,
     generics.mixins.DestroyModelMixin,
-    GetSerializerClassMixin,
 ):
     queryset = Portfolio.objects.all()
-    serializer_class = portfolio_serializers.ListPortfolioSerializer
+    serializer_class = portfolio_serializers.UserViewPortfolioSerializer
 
+    serializer_role_action_classes = {
+        (User.Role.ADMIN, 'list'): AdminViewPortfolioSerializer,
+        (User.Role.ADMIN, 'retrieve'): AdminViewPortfolioSerializer,
+    }
     serializer_action_classes = {
         'update': UpdatePortfolioSerializer,
         'partial_update': UpdatePortfolioSerializer,
@@ -67,5 +72,5 @@ class PortfolioViewSet(
         :return: A list of all the portfolios that belong to a user
         """
         portfolios = PortfolioService.get_portfolio_by_user(request.user)
-        serializer = ListPortfolioSerializer(portfolios, many=True)
+        serializer = UserViewPortfolioSerializer(portfolios, many=True)
         return Response(serializer.data)

@@ -21,7 +21,7 @@ class SubscriptionService:
         user.subscriptions.add(asset)
         user.save()
         CreateRecommendationService.execute(asset=asset, user=user)
-        return AssetSerializer(user.subscriptions, many=True).data
+        return user.subscriptions
 
     @staticmethod
     def delete(user, subscription_id):
@@ -37,4 +37,4 @@ class SubscriptionService:
         asset = Asset.objects.get(id=subscription_id)
         user.subscriptions.remove(asset)
         user.save()
-        return AssetSerializer(user.subscriptions, many=True).data
+        return user.subscriptions

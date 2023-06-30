@@ -1,5 +1,4 @@
 from recommendations.models import Recommendation
-from recommendations.serializers import ListRecommendationSerializer
 
 
 class GetRecommendationService:

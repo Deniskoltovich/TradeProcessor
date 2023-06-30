@@ -39,10 +39,7 @@ class CreateRecommendationService:
         recommendation = CreateRecommendationService.create_new_recommendation(
             user, user_assets
         )
-        if not recommendation:
-            return {'message': 'No asset to recommend'}
-        serializer = CreateRecommendationSerializer(instance=recommendation)
-        return serializer.data
+        return recommendation
 
     @staticmethod
     def switch_recommendation(user):

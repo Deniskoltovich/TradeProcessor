@@ -4,7 +4,7 @@ from django.db import transaction
 from accounts.models import Portfolio, PortfolioAsset
 from assets.models import Asset
 from orders.models import Order
-from orders.serializers import CreateOrderSerializer
+from orders.serializers import UpdateCreateOrderSerializer
 from recommendations.services.create_recommendation_service import (
     CreateRecommendationService,
 )

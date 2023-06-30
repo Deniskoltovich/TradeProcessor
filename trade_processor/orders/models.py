@@ -1,7 +1,8 @@
+from django.db import models
+
 from accounts.models import Portfolio
 from assets.models import Asset
-from django.db import models
-from mixins.models import EditCreationDateMixinModel
+from mixins.base_model import EditCreationDateMixinModel
 
 # mypy: ignore-errors
 

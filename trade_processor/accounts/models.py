@@ -3,7 +3,7 @@ from django.db import models
 
 from accounts.managers import UserManager
 from assets.models import Asset
-from mixins.models import EditCreationDateMixinModel
+from mixins.base_model import EditCreationDateMixinModel
 
 # mypy: ignore-errors
 

@@ -5,11 +5,9 @@ from accounts.models import User
 # mypy: ignore-errors
 
 
-class ListUserSerializer(serializers.ModelSerializer):
+class AdminViewUserSerializer(serializers.ModelSerializer):
 
-    portfolios_id = serializers.PrimaryKeyRelatedField(
-        many=True, read_only=True
-    )
+    portfolios = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
 
     class Meta:
         model = User
@@ -20,7 +18,29 @@ class ListUserSerializer(serializers.ModelSerializer):
             "avatar_url",
             "subscriptions",
             "balance",
-            "portfolios_id",
+            "portfolios",
+            "created_at",
+            "updated_at",
+        )
+
+
+class UserViewUserSerializer(serializers.ModelSerializer):
+
+    portfolios = serializers.SlugRelatedField(
+        many=True, read_only=True, slug_field='name'
+    )
+    subscriptions = serializers.SlugRelatedField(
+        many=True, read_only=True, slug_field='name'
+    )
+
+    class Meta:
+        model = User
+        fields = (
+            'username',
+            "email",
+            "subscriptions",
+            "balance",
+            "portfolios",
             "created_at",
             "updated_at",
         )
