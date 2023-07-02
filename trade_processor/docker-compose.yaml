@@ -5,11 +5,13 @@ services:
     restart: unless-stopped
     build:
       dockerfile: ./Dockerfile
+
+    entrypoint: /code/entrypoint_web.sh
     ports:
       - '${APP_PORT}:8000'
 
     volumes:
-      - .:/var
+      - .:/code
     env_file:
       - .env
     depends_on:
