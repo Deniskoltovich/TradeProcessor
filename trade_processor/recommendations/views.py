@@ -14,6 +14,7 @@ class RecommendationViewSet(
     viewsets.GenericViewSet,
     generics.mixins.RetrieveModelMixin,
     generics.mixins.ListModelMixin,
+    generics.mixins.DestroyModelMixin,
 ):
     queryset = Recommendation.objects.all()
     serializer_class = ListRecommendationSerializer
@@ -21,6 +22,7 @@ class RecommendationViewSet(
     permission_action_classes = {
         'list': (IsOwner,),
         'retrieve': (IsOwner,),
+        'destroy': (IsOwner,),
     }
 
     def get_permissions(self):
