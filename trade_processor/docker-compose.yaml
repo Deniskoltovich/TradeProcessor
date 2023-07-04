@@ -20,9 +20,8 @@ services:
       - db
   celery:
     restart: unless-stopped
-    build:
-      dockerfile: ./Dockerfile
-    entrypoint: celery -A config worker -l info
+    image: "web"
+    entrypoint: /code/entrypoint_celery.sh
     volumes:
       - .:/code
     env_file:
