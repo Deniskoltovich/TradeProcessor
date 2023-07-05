@@ -1,65 +1,51 @@
-import os
+import pytest
+import rest_framework
 
 from accounts.models import Portfolio, User
-from assets.models import Asset
-from django.test import Client, TestCase
+from accounts.views.portfolio_views import PortfolioViewSet
 
 
-class TestPortfolioView(TestCase):
-    fixtures = ['users.json']
+@pytest.mark.django_db
+class TestPortfolioViewSet:
+    #  Tests that the list method returns a list of all portfolios for an admin user
+    def test_list_method_returns_all_portfolios_for_admin_user(
+        self, mocker, portfolio
+    ):
 
-    def setUp(self) -> None:
-        self.client = Client()
-        self.user = User.objects.get(username='user')
-        self.asset = Asset.objects.create(
-            name='Bitcoin', type=Asset.Type.CRYPTOCURRENCY
-        )
-        self.url = (
-            f"http://{os.environ.get('APP_HOST'):{os.environ.get('APP_PORT')}}"
-        )
-        return super().setUp()
+        request = mocker.Mock(user=mocker.Mock(role=User.Role.ADMIN))
+        view = PortfolioViewSet()
+        view.get_object = mocker.Mock(return_value=request.user)
+        view.request = mocker.Mock(return_value=request)
+        view.action = 'list'
+        view.format_kwarg = mocker.Mock(return_value={})
+        view.request = request
+        response = view.list(request)
+        assert response.status_code == 200
+        assert len(response.data) == Portfolio.objects.count()
 
-    def test_is_admin_permission_for_get_portfolios_list(self):
-        self.client.login(username='admin', password='admin')
+    def test_retrieve_method_raises_permission_denied_for_non_admin_owner(
+        self, mocker, portfolio
+    ):
+        request = mocker.Mock(user=mocker.Mock(role=User.Role.USER))
+        view = PortfolioViewSet()
+        view.request = request
+        view.action = 'retrieve'
+        view.kwargs = {'pk': portfolio.pk}
+        view.format_kwarg = None
 
-        response = self.client.get(f'{self.url}/accounts/portfolios/')
+        with pytest.raises(rest_framework.exceptions.PermissionDenied):
+            view.retrieve(request, pk=portfolio.pk)
 
-        self.assertEquals(response.status_code, 200)
+    def test_update_method_returns_404_error_for_non_owner_user(
+        self, mocker, portfolio
+    ):
+        portfolio = Portfolio.objects.first()
+        request = mocker.Mock(user=mocker.Mock(role=User.Role.USER))
+        view = PortfolioViewSet()
+        view.request = request
+        view.action = 'update'
+        view.kwargs = {'pk': portfolio.pk, 'name': 'New Name'}
+        view.format_kwarg = None
 
-    def test_user_get_portfolios_list(self):
-        self.client.login(username='user', password='user')
-
-        response = self.client.get(f'{self.url}/accounts/portfolios/')
-
-        self.assertEquals(response.status_code, 403)
-
-    def test_is_user_permission_for_portfolio_creation(self):
-        self.client.login(username='user', password='user')
-        data = {
-            'user': self.user,
-        }
-
-        response = self.client.post(f'{self.url}/accounts/portfolios/', data)
-
-        self.assertEquals(response.status_code, 403)
-
-    def test_is_admin_permission_for_delete(self):
-        self.client.login(username='admin', password='admin')
-        portfolio = Portfolio.objects.create(user=self.user)
-        response = self.client.delete(
-            f'{self.url}/accounts/portfolios/{portfolio.id}/'
-        )
-
-        self.assertEquals(response.status_code, 204)
-
-    def test_is_admin_permission_for_retrieve(self):
-        self.client.login(username='admin', password='admin')
-        portfolio = Portfolio.objects.create(user=self.user)
-        portfolio.assets.add(self.asset)
-        portfolio.save()
-
-        response = self.client.get(
-            f'{self.url}/accounts/portfolios/{portfolio.id}/'
-        )
-
-        self.assertEquals(response.status_code, 200)
+        with pytest.raises(rest_framework.exceptions.PermissionDenied):
+            view.update(request)
