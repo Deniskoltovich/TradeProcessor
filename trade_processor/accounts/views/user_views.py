@@ -1,7 +1,5 @@
 import jwt
-from django.core.exceptions import BadRequest
-from django.db import transaction
-from rest_framework import exceptions, generics, status, viewsets
+from rest_framework import exceptions, generics, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -29,7 +27,6 @@ from accounts.services.user.create_user import CreateUserService
 from accounts.services.user.update_user import UpdateUserService
 from assets.serializers import AssetSerializer
 from mixins.get_serializer_class_mixin import GetSerializerClassMixin
-from orders import serializers
 
 
 class UserViewSet(
@@ -56,15 +53,15 @@ class UserViewSet(
         (
             User.Role.ADMIN,
             'list_transactions',
-        ): serializers.AdminViewOrderSerializer,
+        ): user_serializers.AdminViewUserSerializer,
         (User.Role.USER, 'create'): user_serializers.UserViewUserSerializer,
     }
 
     serializer_action_classes = {
         'update': user_serializers.UpdateUserByAdminSerializer,
         'retrieve': user_serializers.UserViewUserSerializer,
-        "list_transactions": serializers.UserViewOrderSerializer,
-        'create': user_serializers.AdminViewUserSerializer,
+        "list_transactions": user_serializers.UserViewUserSerializer,
+        'create': user_serializers.UserViewUserSerializer,
     }
 
     permission_action_classes = {
@@ -73,7 +70,6 @@ class UserViewSet(
         'update': (IsAdministrator | IsOwner,),
         'create': (AllowAny,),
         'login': (AllowAny,),
-        'activate_user': (AllowAny,),
         'refresh_token': (AllowAny,),
         'add_subscription': (IsUser,),
         'list_subscription': (IsOwner,),
@@ -118,7 +114,6 @@ class UserViewSet(
             user = self.get_object()
             return Response(UpdateUserPasswordService.update(user, request))
 
-    @transaction.atomic()
     def create(self, request, *args, **kwargs):
         user = CreateUserService.create(request)
         serializer = self.get_serializer_class()(instance=user)
@@ -126,39 +121,6 @@ class UserViewSet(
             serializer.data,
             status=201,
         )
-
-    @action(
-        detail=False,
-        methods=('get',),  # type: ignore
-        url_path='activation',
-    )
-    def activate_user(self, request):
-
-        """
-        The activate_user function is used to activate a user's
-            account from email.
-
-        :param self: Represent the instance of the class
-        :param request: Get the user_id and confirmation_token
-            from the url
-        :return: A response with the status code 200 (ok) and
-            a message
-        """
-        user_id = request.query_params.get('user_id', '')
-        confirmation_token = request.query_params.get('confirmation_token', '')
-        try:
-            auth_service.AuthService.activate_user(user_id, confirmation_token)
-        except User.DoesNotExist:
-            return Response(
-                'User not found', status=status.HTTP_400_BAD_REQUEST
-            )
-        except BadRequest:
-            return Response(
-                'Token is invalid or expired. Please request another'
-                ' confirmation email by signing in.',
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        return Response('Email successfully confirmed')
 
     @action(
         detail=True,
