@@ -1,3 +1,5 @@
+import decimal
+
 from accounts.models import User
 
 
@@ -20,7 +22,7 @@ class UpdateUserService:
         """
         user = User.objects.get(pk=pk)
         if data.get('balance'):
-            data['balance'] += user.balance
+            data['balance'] = decimal.Decimal(data['balance']) + user.balance
         else:
             data['balance'] = user.balance
         if not data.get('status'):

@@ -33,6 +33,14 @@ class User(AbstractUser, EditCreationDateMixinModel):
 
     objects = UserManager()
 
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(balance__gte=0),
+                name="check_balance_is_positive",
+            )
+        ]
+
 
 class Portfolio(EditCreationDateMixinModel):
     user = models.ForeignKey(

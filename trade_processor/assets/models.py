@@ -21,5 +21,13 @@ class Asset(models.Model):
         max_digits=11, decimal_places=2, blank=False
     )
 
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(current_price__gte=0),
+                name="check_current_price_is_positive",
+            )
+        ]
+
     def __str__(self):
         return self.name
