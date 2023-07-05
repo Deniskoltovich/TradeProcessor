@@ -1,86 +1,87 @@
-# from accounts.models import Portfolio, User
-# from assets.models import Asset
-# from django.db.utils import DataError, IntegrityError
-# from django.test import TestCase
-# from orders.models import AutoOrder, Order
-#
-#
-# class TestOrderModels(TestCase):
-#     def setUp(self) -> None:
-#         self.user = User.objects.create(
-#             username='some_name', email='post@d.com'
-#         )
-#         self.portfolio = Portfolio.objects.create(
-#             user=self.user,
-#             name='some name',
-#         )
-#         self.asset = Asset.objects.create(
-#             name='Bitcoin', type=Asset.Type.CRYPTOCURRENCY
-#         )
-#         return super().setUp()
-#
-#     def test_order_assigning_default_values(self):
-#         order = Order.objects.create(
-#             portfolio=self.portfolio,
-#             asset=self.asset,
-#             operation_type=Order.OperationType.BUY,
-#             price=20000.00,
-#             quantity=1,
-#             status=Order.Status.FINISHED,
-#         )
-#         assert order.initializer == order.Initializer.MANUAL
-#
-#     def test_order_price_overflow(self):
-#         with self.assertRaises(DataError):
-#             Order.objects.create(
-#                 portfolio=self.portfolio,
-#                 asset=self.asset,
-#                 operation_type=Order.OperationType.BUY,
-#                 price=1000000000.00,
-#                 quantity=1,
-#                 status=Order.Status.FINISHED,
-#             )
-#
-#     def test_auto_order_price_overflow(self):
-#         with self.assertRaises(DataError):
-#             AutoOrder.objects.create(
-#                 portfolio=self.portfolio,
-#                 asset=self.asset,
-#                 operation_type=AutoOrder.OperationType.BUY,
-#                 desired_price=1000000000.00,
-#                 price_direction=AutoOrder.PriceDirection.LOWER,
-#                 quantity=1,
-#                 status=AutoOrder.Status.OPENED,
-#             )
-#
-#     def test_required_operation_type_in_order(self):
-#         with self.assertRaises(IntegrityError):
-#             Order.objects.create(
-#                 portfolio=self.portfolio,
-#                 asset=self.asset,
-#                 price=100000.00,
-#                 quantity=1,
-#                 status=Order.Status.FINISHED,
-#             )
-#
-#     def test_required_price_direction_in_auto_order(self):
-#         with self.assertRaises(IntegrityError):
-#             AutoOrder.objects.create(
-#                 portfolio=self.portfolio,
-#                 asset=self.asset,
-#                 operation_type=AutoOrder.OperationType.BUY,
-#                 desired_price=1000.00,
-#                 quantity=1,
-#                 status=AutoOrder.Status.OPENED,
-#             )
-#
-#     def test_required_operation_type_in_auto_order(self):
-#         with self.assertRaises(IntegrityError):
-#             AutoOrder.objects.create(
-#                 portfolio=self.portfolio,
-#                 asset=self.asset,
-#                 operation_type=AutoOrder.OperationType.BUY,
-#                 desired_price=10000.00,
-#                 quantity=1,
-#                 status=AutoOrder.Status.OPENED,
-#             )
+import pytest
+from django.db import IntegrityError
+from rest_framework.exceptions import ValidationError
+
+from accounts.models import Portfolio, User
+from assets.models import Asset
+from orders.models import Order
+
+
+@pytest.mark.django_db
+class TestOrder:
+    #  Tests that a new order can be created with valid data
+    def test_create_order_valid_data(self, portfolio, asset):
+
+        order = Order.objects.create(
+            portfolio=portfolio,
+            asset=asset,
+            operation_type=Order.OperationType.BUY,
+            price=10,
+            quantity=1,
+        )
+        assert order.id is not None
+
+    #  Tests that an existing order can be updated with valid data
+    def test_update_order_valid_data(self, portfolio, asset):
+
+        order = Order.objects.create(
+            portfolio=portfolio,
+            asset=asset,
+            operation_type=Order.OperationType.BUY,
+            price=10,
+            quantity=1,
+        )
+        order.price = 20
+        order.save()
+        assert Order.objects.get(id=order.id).price == 20
+
+    #  Tests that an existing order can be deleted
+    def test_delete_order(self, portfolio, asset):
+
+        order = Order.objects.create(
+            portfolio=portfolio,
+            asset=asset,
+            operation_type=Order.OperationType.BUY,
+            price=10,
+            quantity=1,
+        )
+        order_id = order.id
+        order.delete()
+        with pytest.raises(Order.DoesNotExist):
+            Order.objects.get(id=order_id)
+
+    #  Tests that a new order cannot be created with invalid data
+    def test_create_order_invalid_data(self, portfolio, asset):
+
+        with pytest.raises(IntegrityError):
+            Order.objects.create(
+                portfolio=portfolio,
+                asset=asset,
+                operation_type=None,
+                price=10,
+                quantity=1,
+            )
+
+    #  Tests that a new order cannot be created with a negative price
+    def test_create_order_negative_price(self, portfolio, asset):
+
+        with pytest.raises(IntegrityError):
+            Order.objects.create(
+                portfolio=portfolio,
+                asset=asset,
+                operation_type=Order.OperationType.BUY,
+                price=-10,
+                quantity=1,
+            )
+
+    #  Tests that a new order cannot be created with a negative quantity
+    def test_create_order_negative_quantity(self, portfolio, asset):
+
+        with pytest.raises(IntegrityError):
+            Order.objects.create(
+                portfolio=portfolio,
+                asset=asset,
+                operation_type=Order.OperationType.BUY,
+                price=10,
+                quantity=-1,
+            )

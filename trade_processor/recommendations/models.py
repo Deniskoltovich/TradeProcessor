@@ -13,4 +13,15 @@ class Recommendation(models.Model):
 
     class Meta:
         get_latest_by = "relevance_value"
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(relevance_value__gte=0),
+                name="check_relevance_value_is_positive",
+            ),
+            models.CheckConstraint(
+                check=models.Q(relevance_value__lte=1),
+                name="check_relevance_value_is_lte_one",
+            ),
+        ]
+
         unique_together = ['user', 'asset']
