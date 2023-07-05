@@ -25,7 +25,6 @@ class TestUserViewSet:
         )
         # Act
         response = view.retrieve(request, **kwargs)
-        print(response.data)
         # Assert
         assert response.status_code == 200
         assert response.data['email'] == user.email

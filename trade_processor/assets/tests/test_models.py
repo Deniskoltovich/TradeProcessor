@@ -90,8 +90,6 @@ class TestAsset:
                 current_price=-150,
             )
 
-    #  Tests that an Asset object cannot be updated with an invalid type
-
     #  Tests that an Asset object cannot be updated with a negative current price
     def test_update_asset_with_negative_current_price(self):
         asset = Asset.objects.create(

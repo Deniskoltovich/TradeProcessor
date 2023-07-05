@@ -18,6 +18,8 @@ mock = "*"
 drf-yasg = "*"
 isort = "*"
 pyjwt = "*"
+pytest-django = "*"
+pytest-mock = "*"
 
 [dev-packages]
 

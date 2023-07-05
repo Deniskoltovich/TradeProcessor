@@ -77,6 +77,8 @@ class OrderCreateService:
         :return: An error if the user doesn't have enough balance to buy
          or sell an asset
         """
+        if validated_data['price'] < 0:
+            raise django.db.IntegrityError('Price should be positive number')
         if validated_data["operation_type"] == Order.OperationType.SELL:
             try:
                 PortfolioAsset.objects.get(asset=asset, portfolio=portfolio)
