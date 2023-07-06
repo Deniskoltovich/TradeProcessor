@@ -20,9 +20,9 @@ class RecommendationViewSet(
     serializer_class = ListRecommendationSerializer
 
     permission_action_classes = {
-        'list': (IsOwner,),
-        'retrieve': (IsOwner,),
-        'destroy': (IsOwner,),
+        'list': (IsUser,),
+        'retrieve': (IsUser,),
+        'destroy': (IsUser,),
     }
 
     def get_permissions(self):
@@ -43,4 +43,6 @@ class RecommendationViewSet(
         return Response(data)
 
     def get_queryset(self):
-        return self.queryset.filter(user=self.request.user)
+        if self.request.user and self.request.user.is_authenticated:
+            return self.queryset.filter(user=self.request.user)
+        return self.queryset.none()
