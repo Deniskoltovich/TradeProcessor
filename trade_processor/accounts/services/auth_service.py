@@ -3,9 +3,11 @@ from datetime import datetime, timedelta
 import jwt
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
+from django.contrib.auth.tokens import default_token_generator
+from django.core.exceptions import BadRequest
+from django.urls import reverse
 from rest_framework import exceptions
 
-from accounts.models import User
 from config import settings
 
 
@@ -51,7 +53,7 @@ class AuthService:
                 'username and password required'
             )
 
-        user = User.objects.filter(username=username).first()
+        user = get_user_model().objects.filter(username=username).first()
         if user is None:
             raise exceptions.AuthenticationFailed('user not found')
         if not user.check_password(password):
@@ -70,10 +72,10 @@ class AuthService:
                 username = AuthService.get_username_from_token(auth_header[1])
             except jwt.ExpiredSignatureError:
                 raise exceptions.AuthenticationFailed('Token expired')
-            except (jwt.DecodeError, User.DoesNotExist):
+            except (jwt.DecodeError, get_user_model().DoesNotExist):
                 raise exceptions.AuthenticationFailed('Invalid token')
 
-            user = User.objects.get(username=username)
+            user = get_user_model().objects.get(username=username)
 
         return user
 
@@ -140,3 +142,46 @@ class AuthService:
             token, settings.SECRET_KEY, algorithms=['HS256']
         )
         return decoded_token.get('username')
+
+    @staticmethod
+    def generate_activation_link(user_id):
+
+        """
+        The generate_activation_link function takes a user_id as an
+         argument and returns a tuple containing the activation link
+         and the user object. The function first gets the User model
+         from Django's get_user_model() method, then uses that to
+         retrieve the user with the given id. Next, it generates a
+         confirmation token using Django's default token generator.
+         Finally, it creates an activation link by combining
+         the reverse of our accounts:users-activate-user URL pattern
+         with query parameters for both the user id and confirmation
+          token.
+
+        :param user_id: Get the user from the database
+        :return: A tuple with the activation link and the user object
+        """
+        user = get_user_model().objects.get(pk=user_id)
+        confirmation_token = default_token_generator.make_token(user)
+        activation_link = (
+            f'{reverse("accounts:users-activate-user")} + '
+            f'?user_id={user_id}&confirmation_token={confirmation_token}'
+        )
+        return activation_link, user
+
+    @staticmethod
+    def activate_user(user_id, confirmation_token):
+        """
+        The activate_user function is used to activate a user's account.
+
+        :param user_id: Get the user from the database
+        :param confirmation_token: Check if the user is valid
+        :return: None
+        """
+        user = get_user_model().get(pk=user_id)
+
+        if not default_token_generator.check_token(user, confirmation_token):
+            raise BadRequest
+
+        user.status = user.Status.ACTIVE
+        user.save()

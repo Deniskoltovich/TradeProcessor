@@ -27,7 +27,6 @@ from accounts.services.user.create_user import CreateUserService
 from accounts.services.user.update_user import UpdateUserService
 from assets.serializers import AssetSerializer
 from mixins.get_serializer_class_mixin import GetSerializerClassMixin
-from orders import serializers
 
 
 class UserViewSet(
@@ -54,15 +53,15 @@ class UserViewSet(
         (
             User.Role.ADMIN,
             'list_transactions',
-        ): serializers.AdminViewOrderSerializer,
-        (User.Role.USER, 'create'): serializers.UserViewOrderSerializer,
+        ): user_serializers.AdminViewUserSerializer,
+        (User.Role.USER, 'create'): user_serializers.UserViewUserSerializer,
     }
 
     serializer_action_classes = {
         'update': user_serializers.UpdateUserByAdminSerializer,
         'retrieve': user_serializers.UserViewUserSerializer,
-        "list_transactions": serializers.UserViewOrderSerializer,
-        'create': serializers.AdminViewOrderSerializer,
+        "list_transactions": user_serializers.UserViewUserSerializer,
+        'create': user_serializers.UserViewUserSerializer,
     }
 
     permission_action_classes = {

@@ -16,6 +16,7 @@ from orders import serializers
 from orders.models import Order
 from orders.serializers import UpdateCreateOrderSerializer
 from orders.services.create_order import OrderCreateService
+from orders.tasks.order_creation_email import send_email_with_order_info
 
 
 class OrderViewSet(
@@ -65,10 +66,16 @@ class OrderViewSet(
             order_data = OrderCreateService.create(request.user, request.data)
             serializer = UpdateCreateOrderSerializer(data=order_data)
             serializer.is_valid(raise_exception=True)
-            serializer.save()
+            order = serializer.save()
             OrderCreateService.process_transaction(serializer.validated_data)
+            send_email_with_order_info.delay(serializer.data)
             return Response(serializer.data)
         except ValidationError:
             return Response("Invalid data", status=400)
         except django.db.IntegrityError as e:
+            order.status = Order.Status.CANCELLED
+            order.save()
+            send_email_with_order_info.delay(
+                UpdateCreateOrderSerializer(order).data, e.args
+            )
             return Response(e.args, exception=True)
