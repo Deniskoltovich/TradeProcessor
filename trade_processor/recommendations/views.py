@@ -44,6 +44,7 @@ class RecommendationViewSet(
         return Response(data)
 
     def get_queryset(self):
-        if isinstance(self.request.user, AnonymousUser):
-            return self.queryset.none()
-        return self.queryset.filter(user=self.request.user)
+
+        if self.request.user and self.request.user.is_authenticated:
+            return self.queryset.filter(user=self.request.user)
+        return self.queryset.none()
