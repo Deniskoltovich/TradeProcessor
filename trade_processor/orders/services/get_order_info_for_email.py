@@ -1,5 +1,9 @@
+from celery.utils.log import get_task_logger
+
 from accounts.models import Portfolio
 from assets.models import Asset
+
+logger = get_task_logger(__name__)
 
 
 class GetOrderInfoService:
@@ -34,8 +38,11 @@ class GetOrderInfoService:
                 f'\n price: {price}\n'
                 f' quantity: {order_data["quantity"]}\n'
                 f' operation:{order_data["operation_type"]}'
-                f'price direction: {order_data["price_direction"]}'
+                + f'price direction: {order_data["price_direction"]}'
                 if auto
                 else ''
             )
-        return message, Portfolio.objects.get(pk=order_data['portfolio'])
+        user_email = Portfolio.objects.get(
+            pk=order_data['portfolio']
+        ).user.email
+        return message, user_email

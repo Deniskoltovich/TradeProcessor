@@ -55,6 +55,7 @@ class UpdateCreateOrderSerializer(serializers.ModelSerializer):
             "operation_type",
             "price",
             "quantity",
+            "status",
         )
 
 
@@ -103,4 +104,5 @@ class UpdateCreateAutoOrderSerializer(serializers.ModelSerializer):
             "desired_price",
             "quantity",
             "price_direction",
+            "status",
         ]
