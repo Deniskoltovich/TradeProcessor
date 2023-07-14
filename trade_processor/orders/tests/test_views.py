@@ -1,38 +1,96 @@
-import decimal
-import os
+import django.http
+import pytest
 
 from accounts.models import User
-from assets.models import Asset
-from django.test import Client, RequestFactory, TestCase
+from orders.models import Order
 from orders.views import OrderViewSet
 
 
-class TestUserView(TestCase):
-    fixtures = ['users.json']
+@pytest.mark.django_db
+class TestOrderViewSet:
+    #  Tests that an admin can list orders
+    def test_admin_list_orders(self, mocker, user):
+        request = mocker.Mock()
+        request.user = user
 
-    def setUp(self) -> None:
-        self.client = Client()
-        self.asset = Asset.objects.create(
-            name='Bit', type=Asset.Type.CRYPTOCURRENCY
+        view = OrderViewSet()
+        view.action = 'list'
+        view.kwargs = {}
+        view.request = request
+
+        view.format_kwarg = None
+        response = view.list(request)
+        assert response.status_code == 200
+
+    #  Tests that an analyst can list orders
+    def test_analyst_list_orders(self, mocker):
+        request = mocker.Mock(user=mocker.Mock(role=User.Role.ANALYST))
+        view = OrderViewSet()
+        view.action = 'list'
+        view.kwargs = {}
+        view.request = request
+        view.format_kwarg = None
+        response = view.list(request)
+        assert response.status_code == 200
+
+    #  Tests that an admin can retrieve an order
+    def test_admin_retrieve_order(self, mocker, asset, portfolio):
+        order = Order.objects.create(
+            asset=asset,
+            portfolio=portfolio,
+            operation_type=Order.OperationType.BUY,
+            quantity=5,
+            price=asset.current_price,
         )
-        self.user = User.objects.get(username='user')
-        self.url = (
-            f"http://{os.environ.get('APP_HOST'):{os.environ.get('APP_PORT')}}"
-        )
-        return super().setUp()
+        request = mocker.Mock(user=mocker.Mock(role=User.Role.ADMIN))
+        view = OrderViewSet()
+        view.action = 'retrieve'
+        view.kwargs = {'pk': order.pk}
+        view.format_kwarg = None
+        view.request = request
 
-    def test_is_admin_permission_for_orders_list(self):
-        request = RequestFactory().get(f'{self.url}/orders/')
+        response = view.retrieve(request)
+        assert response.status_code == 200
 
-        request.user = User.objects.get(username='admin')
-        response = OrderViewSet.as_view({'get': 'list'})(request)
+    #  Tests that a user can create an order
+    def test_user_create_order(self, mocker, portfolio, asset):
+        user = portfolio.user
 
-        self.assertEquals(response.status_code, 200)
+        data = {
+            'asset': asset.pk,
+            'portfolio': portfolio.pk,
+            'operation_type': Order.OperationType.BUY,
+            'quantity': 5,
+        }
+        request = mocker.Mock(user=user, data=data)
+        view = OrderViewSet()
+        view.action = 'create'
+        view.kwargs = data
+        view.format_kwarg = None
+        view.request = request
 
-    def test_is_user_permission_for_order_list(self):
-        request = RequestFactory().get(f'{self.url}/orders/')
+        response = view.create(request)
 
-        request.user = User.objects.get(username='user')
-        response = OrderViewSet.as_view({'get': 'list'})(request)
+        assert response.status_code == 200
 
-        self.assertEquals(response.status_code, 403)
+    def test_user_create_order_with_invalid_data(
+        self, mocker, portfolio, asset
+    ):
+        user = portfolio.user
+
+        data = {
+            'asset': asset.pk,
+            'portfolio': portfolio.pk,
+            'operation_type': Order.OperationType.BUY,
+            'quantity': -5,
+        }
+        request = mocker.Mock(user=user, data=data)
+        view = OrderViewSet()
+        view.action = 'create'
+        view.kwargs = data
+        view.format_kwarg = None
+        view.request = request
+
+        response = view.create(request)
+
+        assert response.status_code == 400

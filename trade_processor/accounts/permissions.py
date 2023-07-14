@@ -1,6 +1,7 @@
 from rest_framework import permissions
 
 from accounts.models import Portfolio, User
+from recommendations.models import Recommendation
 
 
 class IsAdministrator(permissions.BasePermission):

@@ -31,13 +31,20 @@ class Order(EditCreationDateMixinModel):
         max_length=4, choices=OperationType.choices, default=None, null=False
     )
     price = models.DecimalField(max_digits=11, decimal_places=2, blank=False)
-    quantity = models.IntegerField(blank=False)
+    quantity = models.PositiveIntegerField(blank=False)
     status = models.CharField(
         max_length=9, choices=Status.choices, default=Status.FINISHED
     )
 
     class Meta:
         ordering = ['-updated_at', '-created_at']
+
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(price__gte=0),
+                name="check_price_is_positive",
+            )
+        ]
 
 
 class AutoOrder(EditCreationDateMixinModel):
@@ -66,7 +73,7 @@ class AutoOrder(EditCreationDateMixinModel):
     desired_price = models.DecimalField(
         max_digits=11, decimal_places=2, blank=False
     )
-    quantity = models.IntegerField(blank=False)
+    quantity = models.PositiveIntegerField(blank=False)
 
     price_direction = models.CharField(
         choices=PriceDirection.choices, max_length=6, default=None, null=False
@@ -74,3 +81,11 @@ class AutoOrder(EditCreationDateMixinModel):
     status = models.CharField(
         max_length=9, choices=Status.choices, default=Status.OPENED
     )
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(desired_price__gte=0),
+                name="check_desired_price_is_positive",
+            )
+        ]
