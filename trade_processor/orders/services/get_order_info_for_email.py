@@ -1,10 +1,14 @@
+from celery.utils.log import get_task_logger
+
 from accounts.models import Portfolio
 from assets.models import Asset
+
+logger = get_task_logger(__name__)
 
 
 class GetOrderInfoService:
     @staticmethod
-    def get_info(order_data, errors=None):
+    def get_info(order_data, errors=None, auto=False):
 
         """
         The get_info function takes an order_data dictionary and a
@@ -19,16 +23,26 @@ class GetOrderInfoService:
         :return: A tuple of two values:
         """
         asset = Asset.objects.get(pk=order_data['asset'])
+        price = (
+            asset.current_price if not auto else order_data["desired_price"]
+        )
         if errors:
             message = (
                 f'Your order on {asset}, price: '
-                f'{asset.current_price} was declined:\n' + ' '.join(errors)
+                f'{price} was declined:\n' + ' '.join(errors)
             )
         else:
             message = (
-                f'Your order on {asset} is finished successfully:'
-                f'\n price: {asset.current_price}\n'
+                f'Your order on {asset} is {order_data["status"].lower()}'
+                ' successfully:'
+                f'\n price: {price}\n'
                 f' quantity: {order_data["quantity"]}\n'
                 f' operation:{order_data["operation_type"]}'
+                + f'price direction: {order_data["price_direction"]}'
+                if auto
+                else ''
             )
-        return message, Portfolio.objects.get(pk=order_data['portfolio'])
+        user_email = Portfolio.objects.get(
+            pk=order_data['portfolio']
+        ).user.email
+        return message, user_email

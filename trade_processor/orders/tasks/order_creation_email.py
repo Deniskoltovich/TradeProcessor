@@ -5,7 +5,10 @@ from orders.services.get_order_info_for_email import GetOrderInfoService
 
 
 @celery_app.task(bind=False)
-def send_email_with_order_info(order_data, errors: tuple = (None,)):
+def send_email_with_order_info(
+    order_data, errors: tuple | None = None, auto=False
+
+):
     """
     The send_email_with_order_info function sends an email to the
     user with information about their order.
@@ -16,7 +19,7 @@ def send_email_with_order_info(order_data, errors: tuple = (None,)):
     :return: None
     """
 
-    message, recipient = GetOrderInfoService.get_info(order_data, errors)
+    message, recipient = GetOrderInfoService.get_info(order_data, errors, auto)
     send_mail(
         subject='Order status',
         message=message,

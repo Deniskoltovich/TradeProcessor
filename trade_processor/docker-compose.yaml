@@ -34,7 +34,8 @@ services:
   redis:
     image: redis:alpine
     command:  redis-server --port ${REDIS_PORT}
-
+    env_file:
+      - ./.env
     ports:
       - "${REDIS_PORT}:7777"
 

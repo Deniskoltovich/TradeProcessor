@@ -10,7 +10,7 @@ from recommendations.services.create_recommendation_service import (
 
 class OrderCreateService:
     @staticmethod
-    def create(user, data):
+    def create(user, data, auto_order=False):
 
         """
         The execute function is the main function of this service.
@@ -35,14 +35,17 @@ class OrderCreateService:
         data['portfolio'] = portfolio.id
 
         asset = Asset.objects.get(id=data.get('asset'))
-        data['price'] = asset.current_price
+        if not auto_order:
+            data['price'] = asset.current_price
         return data
 
     @staticmethod
-    def process_transaction(validated_data):
+    def process_transaction(validated_data, auto_order=False):
         portfolio = validated_data['portfolio']
         asset = validated_data.get('asset')
-        OrderCreateService.check_conditions(validated_data, portfolio, asset)
+        OrderCreateService.check_conditions(
+            validated_data, portfolio, asset, auto_order
+        )
 
         try:
             portfolio_asset = PortfolioAsset.objects.get(
@@ -55,21 +58,36 @@ class OrderCreateService:
                 portfolio=portfolio,
                 quantity=validated_data['quantity'],
             )
-        portfolio.user.balance -= (
-            asset.current_price * validated_data['quantity']
-        )
-        portfolio.user.save()
+        if not auto_order:
+            portfolio.user.balance -= (
+                asset.current_price * validated_data['quantity']
+            )
+            portfolio.user.save()
+
         CreateRecommendationService().execute(asset=asset, user=portfolio.user)
 
     @staticmethod
-    def check_conditions(validated_data, portfolio, asset):
+    def process_auto_order(validated_data):
+        portfolio = validated_data['portfolio']
+        asset = validated_data.get('asset')
+
+        OrderCreateService.check_conditions(
+            validated_data, portfolio, asset, auto_order=True
+        )
+
+        portfolio.user.balance -= (
+            validated_data['desired_price'] * validated_data['quantity']
+        )
+        portfolio.user.save()
+
+    @staticmethod
+    def check_conditions(validated_data, portfolio, asset, auto_order=False):
 
         """
         The check_conditions function checks if the user has enough
          balance to buy or sell an asset.
         It also checks if the user is trying to sell an asset that he
          doesn't have in his portfolio.
-
         :param validated_data: Get the data from the serializer
         :param portfolio: To check if the user has enough balance to buy
             an asset
@@ -98,7 +116,8 @@ class OrderCreateService:
             )
         elif (
             validated_data["operation_type"] == Order.OperationType.BUY
-            and validated_data['price'] * validated_data['quantity']
+            and validated_data['price' if not auto_order else 'desired_price']
+            * validated_data['quantity']
             > portfolio.user.balance
         ):
             raise django.db.IntegrityError(

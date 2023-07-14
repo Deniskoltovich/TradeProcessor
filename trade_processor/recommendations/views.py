@@ -1,3 +1,4 @@
+from django.contrib.auth.models import AnonymousUser
 from rest_framework import generics, viewsets
 from rest_framework.response import Response
 
@@ -43,6 +44,7 @@ class RecommendationViewSet(
         return Response(data)
 
     def get_queryset(self):
+
         if self.request.user and self.request.user.is_authenticated:
             return self.queryset.filter(user=self.request.user)
         return self.queryset.none()
