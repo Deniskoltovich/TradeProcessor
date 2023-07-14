@@ -142,7 +142,6 @@ class AutoOrderViewSet(
         except django.db.IntegrityError as e:
             auto_order.status = Order.Status.CANCELLED
             auto_order.save()
-            print('here')
             send_email_with_order_info.delay(
                 UpdateCreateOrderSerializer(auto_order).data, e.args, auto=True
             )

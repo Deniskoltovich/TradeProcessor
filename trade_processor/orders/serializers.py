@@ -56,6 +56,7 @@ class UpdateCreateOrderSerializer(serializers.ModelSerializer):
             "price",
             "quantity",
             "status",
+
         )
 
 
@@ -97,7 +98,7 @@ class UserViewAutoOrderSerializer(serializers.ModelSerializer):
 class UpdateCreateAutoOrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = AutoOrder
-        fields = [
+        fields = (
             "portfolio",
             "asset",
             "operation_type",
@@ -105,4 +106,4 @@ class UpdateCreateAutoOrderSerializer(serializers.ModelSerializer):
             "quantity",
             "price_direction",
             "status",
-        ]
+        )
