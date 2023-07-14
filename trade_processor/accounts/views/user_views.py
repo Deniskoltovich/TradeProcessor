@@ -37,7 +37,7 @@ class UserViewSet(
     generics.mixins.UpdateModelMixin,
     generics.mixins.CreateModelMixin,
 ):
-
+    serializer_class = user_serializers.AdminViewUserSerializer
     queryset = User.objects.all()
 
     serializer_role_action_classes = {
@@ -84,6 +84,9 @@ class UserViewSet(
                 self.action, (IsUser,)
             )
         ]
+
+    def get_serializer_class(self):
+        return super().get_serializer_class()
 
     def update(self, request, *args, **kwargs):
 

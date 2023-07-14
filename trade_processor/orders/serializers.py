@@ -16,7 +16,7 @@ class AdminViewOrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = [
+        fields = (
             'id',
             "portfolio",
             "asset",
@@ -25,7 +25,7 @@ class AdminViewOrderSerializer(serializers.ModelSerializer):
             "price",
             "quantity",
             "status",
-        ]
+        )
 
 
 class UserViewOrderSerializer(serializers.ModelSerializer):
@@ -34,7 +34,7 @@ class UserViewOrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = [
+        fields = (
             "portfolio",
             "asset",
             "initializer",
@@ -42,20 +42,20 @@ class UserViewOrderSerializer(serializers.ModelSerializer):
             "price",
             "quantity",
             "status",
-        ]
+        )
 
 
 class UpdateCreateOrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
-        fields = [
+        fields = (
             "portfolio",
             "asset",
             "initializer",
             "operation_type",
             "price",
             "quantity",
-        ]
+        )
 
 
 class AdminViewAutoOrderSerializer(serializers.ModelSerializer):
@@ -63,8 +63,8 @@ class AdminViewAutoOrderSerializer(serializers.ModelSerializer):
     asset = AssetSerializer(many=False, read_only=True)
 
     class Meta:
-        model = Order
-        fields = [
+        model = AutoOrder
+        fields = (
             'id',
             "portfolio",
             "asset",
@@ -73,7 +73,7 @@ class AdminViewAutoOrderSerializer(serializers.ModelSerializer):
             "price_direction",
             "quantity",
             "status",
-        ]
+        )
 
 
 class UserViewAutoOrderSerializer(serializers.ModelSerializer):
@@ -81,8 +81,8 @@ class UserViewAutoOrderSerializer(serializers.ModelSerializer):
     asset = AssetSerializer(many=False, read_only=True)
 
     class Meta:
-        model = Order
-        fields = [
+        model = AutoOrder
+        fields = (
             "portfolio",
             "asset",
             "operation_type",
@@ -90,4 +90,17 @@ class UserViewAutoOrderSerializer(serializers.ModelSerializer):
             "price_direction",
             "quantity",
             "status",
+        )
+
+
+class UpdateCreateAutoOrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AutoOrder
+        fields = [
+            "portfolio",
+            "asset",
+            "operation_type",
+            "desired_price",
+            "quantity",
+            "price_direction",
         ]
