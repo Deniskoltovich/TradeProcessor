@@ -4,10 +4,10 @@ import os
 import django
 from kafka import KafkaConsumer
 
+django.setup()
+
 from assets.services.price import PriceService
 from orders.services.auto_order_finisher import AutoOrderFinisher
-
-django.setup()
 
 
 def consume():
