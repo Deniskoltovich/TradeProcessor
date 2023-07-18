@@ -21,6 +21,8 @@ pyjwt = "*"
 pytest-django = "*"
 pytest-mock = "*"
 aiokafka = "*"
+async-to-sync = "*"
+kafka-python = "*"
 
 [dev-packages]
 

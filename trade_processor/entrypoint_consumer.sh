@@ -1,5 +1,5 @@
 #!/bin/sh
 
-python consumer/consume.py
+python consumer.py
 
 exec "$@"

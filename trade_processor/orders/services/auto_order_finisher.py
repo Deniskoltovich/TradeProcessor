@@ -13,28 +13,30 @@ class AutoOrderFinisher:
             asset=asset, status=AutoOrder.Status.OPENED
         )
         for order in opened_orders:
-
             if (
-                (order.price_direction == AutoOrder.PriceDirection.LOWER
-                and order.desired_price <= asset.current_price) or (
-                order.order.price_direction == AutoOrder.PriceDirection.HIGHER
+                order.price_direction == AutoOrder.PriceDirection.LOWER
                 and order.desired_price >= asset.current_price
-            )
+            ) or (
+                order.price_direction == AutoOrder.PriceDirection.HIGHER
+                and order.desired_price <= asset.current_price
             ):
                 AutoOrderFinisher._create_order(order)
-
+                order.status = AutoOrder.Status.FINISHED
+                order.save()
 
     @staticmethod
     def _create_order(auto_order):
         data = {
             'price': auto_order.desired_price,
             "quantity": auto_order.quantity,
-            'asset': auto_order.asset,
-            "portfolio": auto_order.portfolio,
+            'asset': auto_order.asset.pk,
+            "portfolio": auto_order.portfolio.pk,
+            'operation_type': auto_order.operation_type,
             "initializer": Order.Initializer.AUTO,
         }
         serializer = UpdateCreateOrderSerializer(data=data)
         serializer.is_valid(raise_exception=True)
-
-        OrderCreateService.process_transaction(serializer.validated_data, auto_order=True)
-
+        serializer.save()
+        OrderCreateService.process_transaction(
+            serializer.validated_data, auto_order=True
+        )
