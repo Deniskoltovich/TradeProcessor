@@ -24,7 +24,7 @@ jobs:
         run: pip install pipenv
       - name: Run install requirements
         run: |
-          pipenv install --dev
+          pipenv install -d
       - name: run-pre-commit
         working-directory: ./trade_processor
         run: |
