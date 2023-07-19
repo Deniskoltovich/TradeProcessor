@@ -17,6 +17,10 @@ jobs:
     steps: 
       - name: Check out code
         uses: actions/checkout@v2
+      - name: Create env file
+        working-directory: ./trade_processor
+        run: |
+          echo "${{ secrets.ENV_FILE }}" > .env
 
       - name: Build Docker Containers
         working-directory: ./trade_processor

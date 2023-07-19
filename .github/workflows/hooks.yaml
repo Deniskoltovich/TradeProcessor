@@ -15,8 +15,6 @@ jobs:
   Lint:
 
     runs-on: ubuntu-latest
-    env:
-      working-directory: ./trade_processor
       
     steps:
       - name: Checkout
@@ -27,7 +25,7 @@ jobs:
           # The version of Python to use
           python-version: 3.10
       - name: run-pre-commit
-        working-directory: ${{working-directory}}
+        working-directory: ./trade_processor
         run: |
             pipenv install pre-commit
             pipenv run pre-commit run --all-files
