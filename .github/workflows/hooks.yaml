@@ -3,7 +3,7 @@ name: hooks
 on:
   push:
     branches: 
-      - features/**
+      - feature/**
       - main
       - dev
       - fix/**
