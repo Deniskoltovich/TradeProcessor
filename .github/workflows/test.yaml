@@ -1,0 +1,25 @@
+name: Django CI
+
+on:
+  push:
+    branches: 
+      - features/**
+      - main
+      - dev
+      - fix/**
+  pull_request:
+    branches: 
+      - dev
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Tests
+        uses: cloudposse/github-action-docker-compose-test-run@main
+        with:
+          file: trade_processor/docker-compose.yaml
+          service: web
+          command: pytest
