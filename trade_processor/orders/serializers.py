@@ -56,7 +56,6 @@ class UpdateCreateOrderSerializer(serializers.ModelSerializer):
             "price",
             "quantity",
             "status",
-
         )
 
 
