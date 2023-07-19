@@ -1,0 +1,36 @@
+name: hooks
+
+on:
+  push:
+    branches: 
+      - main
+      - dev
+  pull_request:
+    branches: 
+      - dev
+      - main
+
+jobs:
+  Lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up Python 3.10.12
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.10.12
+      - name: Install pipenv
+        working-directory: ./trade_processor
+        run: pip install pipenv
+      - name: Run install requirements
+        working-directory: ./trade_processor
+        run: |
+          pipenv install -d
+          pipenv install pre-commit
+
+      - name: Run pre-commit
+        working-directory: ./trade_processor
+        run: |
+          pipenv run pre-commit install
+          pipenv run pre-commit run --all-files
+

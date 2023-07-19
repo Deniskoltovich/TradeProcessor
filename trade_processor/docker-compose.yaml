@@ -10,7 +10,7 @@ services:
 
     entrypoint: /code/entrypoint_web.sh
     ports:
-      - '${APP_PORT}:8000'
+      - '${APP_PORT:-8000}:8000'
 
     volumes:
       - .:/code
@@ -37,7 +37,7 @@ services:
     env_file:
       - ./.env
     ports:
-      - "${REDIS_PORT}:7777"
+      - "${REDIS_PORT:-7777}:7777"
 
   db:
     image: postgres:13.9
@@ -46,4 +46,4 @@ services:
     env_file:
       - .env
     ports:
-      - '${POSTGRES_PORT}:5432'
+      - '${POSTGRES_PORT:-5432}:5432'
