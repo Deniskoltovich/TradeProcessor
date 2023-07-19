@@ -18,8 +18,7 @@ repos:
           - --max-line-length=79
           - --max-doc-length=72
           - --ignore=E203,W503,W291,W292,F401, B010
-          - --exclude=*/migrations/*
-          - --exclude=*/tests/*
+          - --exclude=*/migrations/* */tests/*
 
 
   - repo: https://github.com/pre-commit/mirrors-mypy
