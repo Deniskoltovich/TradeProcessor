@@ -24,7 +24,7 @@ jobs:
 
       - name: Test
         working-directory: ./trade_processor
-        run: docker-compose -f "docker-compose.test.yaml" exec web pytest
+        run: docker-compose -f "docker-compose.test.yaml" exec -T web pytest
    
       - name: Stop Containers
         working-directory: ./trade_processor
