@@ -15,17 +15,18 @@ jobs:
   Lint:
 
     runs-on: ubuntu-latest
-      
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Install Python, pipenv and Pipfile packages
-        uses: palewire/install-python-pipenv-pipfile@v3
+      - uses: actions/checkout@v1
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v1
         with:
-          # The version of Python to use
           python-version: 3.10
+      - name: Install pipenv
+        run: pip install pipenv
+      - name: Run install requirements
+        run: |
+          pipenv install --dev
       - name: run-pre-commit
         working-directory: ./trade_processor
         run: |
-            pipenv install pre-commit
             pipenv run pre-commit run --all-files
