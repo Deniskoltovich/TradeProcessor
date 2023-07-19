@@ -24,5 +24,6 @@ jobs:
       - name: Run install requirements
         run: pipenv install -d
       - name: Run pre-commit
+        run: pipenv run which pre-commit
         run: pipenv run pre-commit run --all-files
 
