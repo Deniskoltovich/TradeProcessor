@@ -6,8 +6,6 @@ services:
     build:
       dockerfile: ./Dockerfile
     image: 'web'
-
-
     entrypoint: /code/entrypoint_web.sh
     ports:
       - '${APP_PORT}:8000'

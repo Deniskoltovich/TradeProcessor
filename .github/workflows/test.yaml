@@ -20,7 +20,7 @@ jobs:
       - name: Tests
         uses: cloudposse/github-action-docker-compose-test-run@main
         with:
-          file: docker-compose.yaml
+          file: docker-compose.test.yaml
           service: web
           command: pytest
           workdir: ./trade_processor
