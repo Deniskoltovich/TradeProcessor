@@ -22,10 +22,13 @@ jobs:
       - name: Install pipenv
         run: pip install pipenv
       - name: Run install requirements
-        run: pipenv install -d
+        run: |
+          pipenv install -d
+          pipenv install pre-commit
+
+
       - name: Run pre-commit
         run: |
-          pipenv run pip show pre-commit
-
+          pipenv run pre-commit install
           pipenv run pre-commit run --all-files
 
