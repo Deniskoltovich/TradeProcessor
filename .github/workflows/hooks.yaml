@@ -12,7 +12,6 @@ on:
 
 jobs:
   Lint:
-
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -23,11 +22,7 @@ jobs:
       - name: Install pipenv
         run: pip install pipenv
       - name: Run install requirements
-        run: |
-          pipenv install -d
-          pipenv install pre-commit
-      - name: run-pre-commit
-        working-directory: ./trade_processor
-        run: |
-            pipenv shell
-            pipenv run pre-commit run --all-files
+        run: pipenv install -d
+      - name: Run pre-commit
+        run: pipenv run pre-commit run --all-files
+
