@@ -14,13 +14,19 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Tests
-        uses: cloudposse/github-action-docker-compose-test-run@main
-        with:
-          file: docker-compose.test.yaml
-          service: web
-          command: pytest
-          workdir: ./trade_processor
+    steps: 
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Build Docker Containers
+        working-directory: ./trade_processor
+        run:  docker-compose -f "docker-compose.test.yaml" up -d --build
+
+      - name: Test
+        working-directory: ./trade_processor
+        run: docker-compose -f "docker-compose.test.yaml" exec web pytest
+   
+      - name: Stop Containers
+        working-directory: ./trade_processor
+        if: always()
+        run: docker-compose -f "docker-compose.test.yaml" down
