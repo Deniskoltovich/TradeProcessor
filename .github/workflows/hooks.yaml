@@ -12,15 +12,22 @@ on:
       - dev
 
 jobs:
-  build:
+  Lint:
 
     runs-on: ubuntu-latest
+    env:
+      working-directory: ./trade_processor
+      
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
       - name: Install Python, pipenv and Pipfile packages
         uses: palewire/install-python-pipenv-pipfile@v3
         with:
           # The version of Python to use
           python-version: 3.10
       - name: run-pre-commit
-        uses: samwlms/simple-pre-commit@1.3
+        working-directory: ${{working-directory}}
+        run: |
+            pipenv install pre-commit
+            pipenv run pre-commit run --all-files
