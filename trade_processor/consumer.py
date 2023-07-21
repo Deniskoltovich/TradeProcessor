@@ -15,8 +15,8 @@ def consume():
     consumer = KafkaConsumer(
         'Assets',
         bootstrap_servers=os.environ.get('BOOTSTRAP_SERVERS'),
-        group_id='my-consumer-group',
-        auto_offset_reset='earliest',
+        group_id=os.environ.get('CONSUMER_GROUP_ID'),
+        auto_offset_reset=os.environ.get('AUTO_OFFSET_RESET'),
     )
 
     for message in consumer:
