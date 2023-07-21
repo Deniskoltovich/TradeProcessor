@@ -43,9 +43,7 @@ class OrderCreateService:
     def process_transaction(validated_data, auto_order=False):
         portfolio = validated_data['portfolio']
         asset = validated_data.get('asset')
-        OrderCreateService.check_conditions(
-            validated_data, portfolio, asset, auto_order
-        )
+        OrderCreateService.check_conditions(validated_data, portfolio, asset)
 
         try:
             portfolio_asset = PortfolioAsset.objects.get(
@@ -71,9 +69,7 @@ class OrderCreateService:
         portfolio = validated_data['portfolio']
         asset = validated_data.get('asset')
 
-        OrderCreateService.check_conditions(
-            validated_data, portfolio, asset, auto_order=True
-        )
+        OrderCreateService.check_conditions(validated_data, portfolio, asset)
 
         portfolio.user.balance -= (
             validated_data['desired_price'] * validated_data['quantity']
@@ -81,7 +77,7 @@ class OrderCreateService:
         portfolio.user.save()
 
     @staticmethod
-    def check_conditions(validated_data, portfolio, asset, auto_order=False):
+    def check_conditions(validated_data, portfolio, asset):
 
         """
         The check_conditions function checks if the user has enough
@@ -116,8 +112,7 @@ class OrderCreateService:
             )
         elif (
             validated_data["operation_type"] == Order.OperationType.BUY
-            and validated_data['price' if not auto_order else 'desired_price']
-            * validated_data['quantity']
+            and validated_data['price'] * validated_data['quantity']
             > portfolio.user.balance
         ):
             raise django.db.IntegrityError(

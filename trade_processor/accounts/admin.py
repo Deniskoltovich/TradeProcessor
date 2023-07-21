@@ -1,7 +1,7 @@
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin
 
-from accounts.models import Portfolio, User
+from accounts.models import Portfolio, PortfolioAsset, User
 
 admin.site.register(User)
 admin.site.register(Portfolio)
+admin.site.register(PortfolioAsset)

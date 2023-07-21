@@ -17,6 +17,7 @@ drf-yasg = "*"
 pyjwt = "*"
 pytest-django = "*"
 pytest-mock = "*"
+kafka-python = "*"
 
 [dev-packages]
 isort = "*"
